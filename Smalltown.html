@@ -1589,6 +1589,7 @@
 					if (feat.type == 'ITEM' && feat.canPurchase && testConditions(characterState, feat.conditions))
 					{
 						g('saleItemsTable').style.display = 'table';
+						//TODO the prices for items shows up as undefined and NaN
 						row = createFeatureRow(area, feat, [
 								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$', accessibleText: 'Buy 1 for $' + feat.value, attr: { area: area.id, feature: feat.id, purchaseQuantity: 1 } },
 								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x5', accessibleText: 'Buy 5 for $' + (feat.value * 5), attr: { area: area.id, feature: feat.id, purchaseQuantity: 5 } },
@@ -1729,6 +1730,19 @@
 			// newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
 			// newNpcSchedule(area, activity, conditions)
 			// weekdays[0] == monday
+			avery();
+			clayton();
+			dominic();
+			emma();
+			liam();
+			luigi();
+			mateo();
+			olivia();
+		}
+	</script>
+	<script> // NPC: Avery
+		function avery()
+		{
 			var avery = newNpc('Avery', 'Thompson', 29, 0,
 				'A edgy extrovert that is totes obsessed with plants and crystals.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.BLONDE, hairColors.BLUE, hairStyles.SPACEBUNS, eyeColors.HAZEL, aesthetics.ALT),
@@ -1736,6 +1750,11 @@
 					newNPCWorkSchedule('STOWN_PL_struct_GARDENSHOP')
 				]
 			);
+		}
+	</script>
+	<script> // NPC: Clayton
+		function clayton()
+		{
 			var clayton = newNpc('Clayton', 'Lespool', 46, 1,
 				'A boisterous, friendly, guy with a salt-and-pepper beard. Likes to joke around and make friends. Loves a good pun.',
 				newCharacterAppearance(heights.TALL, bodyTypes.FIT, hairColors.GREY, hairColors.GREY, hairStyles.PONYLOW, eyeColors.BROWN, aesthetics.CASUAL),
@@ -1744,7 +1763,7 @@
 					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return !isStructureOpen('STOWN_PL_struct_CLAYSDELI'); }])
 				]);
 			clayton.dialog = [
-				newNpcDialog('Hey there I haven\'t seen you around before. I\'m Clay, the butcher. KNIFE the MEAT YOU!! HAHAHA! Get it? KNIFE? MEAT? Because I\'m the butcher! HAHAHA! Anyway, stop on by the deli some time, it\'s in the Smalltown Plaza.', null,
+				newNpcDialog('Hey there I haven\'t seen you around before. I\'m Clay, the butcher. KNIFE to MEAT YOU!! HAHAHA! Get it? KNIFE? MEAT? Because I\'m the butcher! HAHAHA! Anyway, stop on by the deli some time, it\'s in the Smalltown Plaza.', null,
 					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_CLAYSDELI', 'clayton')
 									&& !isStructureOpen('STOWN_PL_struct_CLAYSDELI')
 									&& getNpcByName('clayton').conversationsToDate < 1); }]
@@ -1800,7 +1819,11 @@
 									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')); }]
 				)
 			];
-
+		}
+	</script>
+	<script> // NPC: Dominic
+		function dominic()
+		{
 			var dominic = newNpc('Dominic', 'Smith', 34, 1,
 				'Slender European hipster with a goatee and a love of sourdough bread.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.THIN, hairColors.BROWN, hairColors.BROWN, hairStyles.MANBUN, eyeColors.BLUE, aesthetics.HIPSTER),
@@ -1867,7 +1890,11 @@
 									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')); }]
 				)
 			];
-			
+		}
+	</script>
+	<script> // NPC: Emma
+		function emma()
+		{
 			var emma = newNpc('Emma', 'Brown', 25, 0,
 				'A bubbly young lass who dresses in rustic western apparel.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.CURVY, hairColors.BLONDE, hairColors.BLONDE, hairStyles.PONYHIGH, eyeColors.BLUE, aesthetics.RUSTIC),
@@ -1876,13 +1903,22 @@
 					newNpcSchedule('EMMAS_HOUSE', 'SLEEPING', [function(){ return !isStructureOpen('EMMARANCH_struct_EMMASSHOP'); }])
 				]
 			);
+		}
+	</script>
+	<script> // NPC: Liam
+		function liam()
+		{
 			var liam = newNpc('Liam', 'O\'Doyle', 26, 1,
 				'A fiery ginger who likes to live life on the edge.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.RED, hairColors.RED, hairStyles.CREW, eyeColors.GREEN, aesthetics.CASUAL),
 				[
 					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return timeBetween(6*60, 18*60); }])
 				]);
-				
+		}
+	</script>
+	<script> // NPC: Luigi
+		function luigi()
+		{
 			var luigi = newNpc('Luigi', 'D\'Graisse', 30, 1,
 				'A loud, obnoxious, chef with a monstrous ego, but the skills to back it up.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.DADBOD, hairColors.BLONDE, hairColors.NBLONDE, hairStyles.CREW, eyeColors.BLUE, aesthetics.CASUAL),
@@ -1920,7 +1956,11 @@
 									&& getNpcByName('luigi').conversationsToDate < 1); }]
 				)
 			];
-
+		}
+	</script>
+	<script> // NPC: Mateo
+		function mateo()
+		{
 			var mateo = newNpc('Mateo', 'Gonzalez', 23, 1,
 				'A quiet, hardworking fellow.',
 				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.BROWN, hairColors.BROWN, hairStyles.CREW, eyeColors.BROWN, aesthetics.RUSTIC),
@@ -1929,6 +1969,11 @@
 					newNpcSchedule('EMMARANCH', 'WORKING', [function(){ return !isDayOfWeek(['SA', 'SU']) && timeBetween(5*60, 13*60); }])
 				],
 				[bodyTypes.CURVY]);
+		}
+	</script>
+	<script> // NPC: Olivia
+		function olivia()
+		{
 			var olivia = newNpc('Olivia', 'Martin',
 				22, 0, 'A short demure girl, with bangs and glasses. She\'d rather stay at home with her cat than go to parties.',
 				newCharacterAppearance(heights.SHORT, bodyTypes.THIN, hairColors.BLONDE, hairColors.BLACK, hairStyles.BOB, eyeColors.BLUE, aesthetics.ALT),
@@ -2961,11 +3006,11 @@
 			t.push(n.firstName + ' ' + n.lastName + renderHearts(n.characterRelationship.level).outerHTML + '%LINE_HOR%' + '<i>' + n.description + '</i><br />');
 			var app = n.appearance;
 			t.push(n.age + ' year old ' + sexes[n.sex]);
-			t.push('Height: ' + app.height.displayName);
-			t.push('Body Type: ' + app.bodyType.displayName);
-			t.push('Hair: ' + app.currentHairColor.displayName + ' ' + app.hairStyle.displayName);
-			t.push('Eyes: ' + app.eyes.displayName);
-			t.push('Aesthetic: ' + app.aesthetic.displayName);
+			t.push('<b>Height:</b> ' + app.height.displayName);
+			t.push('<b>Body Type:</b> ' + app.bodyType.displayName);
+			t.push('<b>Hair:</b> ' + app.currentHairColor.displayName + ' ' + app.hairStyle.displayName);
+			t.push('<b>Eyes:</b> ' + app.eyes.displayName);
+			t.push('<b>Aesthetic:</b> ' + app.aesthetic.displayName);
 			addSignTextNarration(t);
 		}
 		function inspectFeature(featureButton)
