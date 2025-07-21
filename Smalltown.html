@@ -1589,11 +1589,10 @@
 					if (feat.type == 'ITEM' && feat.canPurchase && testConditions(characterState, feat.conditions))
 					{
 						g('saleItemsTable').style.display = 'table';
-						//TODO the prices for items shows up as undefined and NaN
 						row = createFeatureRow(area, feat, [
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$', accessibleText: 'Buy 1 for $' + feat.value, attr: { area: area.id, feature: feat.id, purchaseQuantity: 1 } },
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x5', accessibleText: 'Buy 5 for $' + (feat.value * 5), attr: { area: area.id, feature: feat.id, purchaseQuantity: 5 } },
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x10', accessibleText: 'Buy 10 for $' + (feat.value * 10), attr: { area: area.id, feature: feat.id, purchaseQuantity: 10 } }
+								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$', accessibleText: 'Buy 1 for $' + feat.itemStack.item.value, attr: { area: area.id, feature: feat.id, purchaseQuantity: 1 } },
+								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x5', accessibleText: 'Buy 5 for $' + (feat.itemStack.item.value * 5), attr: { area: area.id, feature: feat.id, purchaseQuantity: 5 } },
+								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x10', accessibleText: 'Buy 10 for $' + (feat.itemStack.item.value * 10), attr: { area: area.id, feature: feat.id, purchaseQuantity: 10 } }
 							]);
 					}
 					if (row != null)
