@@ -6,6 +6,7 @@
 	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 	<meta http-equiv="Pragma" content="no-cache">
 	<meta http-equiv="Expires" content="0">
+	<meta name="description" content="Smalltown - Powered by TextCity Engine">
 	<style>
 		html *
 		{
@@ -325,559 +326,12 @@
 			color: #ffffff;
 		}
 	</style>
-	<script> // constants
-		var LEFT_ARROW = '&#x2B05;';
-		var RIGHT_ARROW = '&#x27A1;';
-		var UP_ARROW = '&#x2B06;';
-		var DOWN_ARROW = '&#x2B07;';
-		
-		var DYNAMITE_ICON = '&#x1F9E8;';
-		var GEAR_ICON = '&#x2699;';
-		var HEART_ICON_BLACK = '<span style="color: #000000;">&#x2764;</span>';
-		var HEART_ICON_RED = '<span style="color: #FF0000;">&#x2764;</span>';
-		var INSPECT_ICON = '&#x1F50D;';
-		var LOCK_ICON = '&#x1F512;';
-		var MOON_ICON = '&#x1F319;';
-		var STAR_ICON = '&#x2B50;';
-		var SUN_ICON = '&#x2600;';
-		var HOURGLASS_ICON = '&#x23F3;';
-	</script>
-	<script> // shortcut functions
-		function g(e) { return document.getElementById(e); }
-		function ce(e) { return document.createElement(e); }
-	</script>
-	<script> // object templates
-		function newCalendarState(season, day, minutes)
-		{
-			return {
-				season: season,
-				dayOfSeason: day,
-				minutes: minutes
-			};
-		}
-		function newCalendarState_Standard()
-		{
-			return newCalendarState(seasons.SPRING, 0, 360)
-		}
-		function newSkill(id, name, desc, level)
-		{
-			return {
-				id: id,
-				displayName: name,
-				description: desc,
-				level: level
-			};
-		}
-		function newSkillSet()
-		{
-			return {
-				cooking: newSkill('cooking', 'Cooking', 'Your ability to cook food. The higher level this skill is, the more recipes you know and the better the cooking results will be.', 0),
-				earlyBird: newSkill('earlyBird', 'Early Bird', 'Early birds get the worm. The higher this skill is, the earlier you wake up, and the less sleep you need each night to start with 100% stamina. Currently this skill wakes you up %EARLYBIRDMIN% minute(s) earlier.', 0),
-				fishing: newSkill('fishing', 'Fishing', 'Using a rod, net or traps to pull creatures from the water. Higher skill levels increase the chance to encounter and catch fish that are more difficult to land.', 0),
-				foraging: newSkill('foraging', 'Foraging', 'Harvesting wild plants. Each level increase the yield by approximately 6% and has a 1% chance to grant a bonus yield of higher quality.', 0),
-				nightOwl: newSkill('nightOwl', 'Night Owl', 'This is your ability to stay up late. Each level increases your bedtime. Currently this skill delays your bedtime by %NIGHTOWLMIN% minute(s).', 0)
-			};
-		}
-		function newTool(id, name, descs, tip, level)
-		{
-			return {
-				id: id,
-				displayName: name,
-				descriptions: ['', ...descs],
-				toolTip: tip,
-				level: level
-			};
-		}
-		function newToolSet()
-		{
-			return {
-				cookingSet: newTool('cookingSet', 'Cooking Set', ['Just a few old knives and a beat up pot. It\'ll get you started.', 'A few nice utensils, pots and pans.', 'A good set of cooking gear for aspiring chef.', 'A professional cooking set.', 'An exceptional quality cooking set up, for accomplished chefs only.'], 'Useful for preparing and combining cooking ingredients, and cooking recipes.', 0),
-				fishingNet: newTool('fishingNet', 'Fishing Net', ['A rotten, old net with lots of broken string.', 'A decent net for a beginner.', 'A good quality net, it should catch lots of fish.', 'A high quality net, like the professionals use.', 'An exceptional quality net.'], 'Useful for catching lots of small fish in water. Doesn\'t require bait.', 0),
-				fishingRod: newTool('fishingRod', 'Fishing Rod', ['A crumby, old rod.', 'A decent beginning rod.', 'A good hobbist rod.', 'A high quality professional rod.', 'An exceptional quality, high performance fishing rod.'], 'Useful for catching fish in water. Requires bait.', 0),
-				shovel: newTool('shovel', 'Shovel', ['A rusty, chipped, splintery, old, shovel.', 'A decent shovel, nothing special.', 'A good quality, sturdy, shovel.', 'A high quality shovel, should last a long time.', 'An exceptional quality shovel.'], 'Useful for digging in the earth.', 0)
-			};
-		}
-		function newCharacterState()
-		{
-			return {
-				name: '',
-				sex: 0,
-				appearance: newCharacterAppearance(),
-				homeProperty: '',
-				health: 0,
-				maxHealth: 0,
-				stamina: 0,
-				maxStamina: 0,
-				money: 0,
-				lastBedtime: 0,
-				currentArea: '',
-				skills: newSkillSet(),
-				tools: newToolSet(),
-				inventory: [],
-				boon: 0,
-				relationships: [],
-				ownedAreas: [],
-				knownRecipes: [],
-				cookedRecipes: {},
-				quests: []
-			};
-		}
-		function newGamePreferences()
-		{
-			return {
-				areaTabOnTravel: true
-			};
-		}
-		function newGamePreferences_Standard()
-		{
-			var gp = newGamePreferences();
-			return gp;
-		}
-		
-		function newWorldState()
-		{
-			return {
-				foragedThisWeek: []
-			};
-		}
-		
-		function newArea(id, name, feats, exits, onEnter)
-		{
-			return {
-				id: id,
-				name: name,
-				features: [...feats],
-				exits: [...exits],
-				onEnter: onEnter
-			};
-		}
-		function newCharacterState_Standard()
-		{
-			var r = newCharacterState();
-			r.name = 'Bosco';
-			r.homeProperty = 'HOMEPROP';
-			r.health = 20;
-			r.maxHealth = 20;
-			r.stamina = 20;
-			r.maxStamina = 20;
-			r.money = 0;
-			r.lastBedtime = 1440; // midnight
-			r.ownedAreas.push('HOMEPROP');
-
-			return r;
-		}
-		function newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
-		{
-			return {
-				height: height,
-				bodyType: bodyType,
-				naturalHairColor: (typeof(natHair) === 'object') ? natHair : hairColors[natHair],
-				currentHairColor: (typeof(curHair) === 'object') ? curHair : hairColors[curHair],
-				hairStyle: (typeof(hairStyle) === 'object') ? hairStyle : hairStyles[hairStyle],
-				eyes: (typeof(eyes) === 'object') ? eyes : eyeColors[eyes],
-				aesthetic: aesthetic
-			};
-		}
-		function newItemStack(item, level, quantity)
-		{
-			return {
-				item: item,
-				level: level,
-				quantity: quantity
-			};
-		}
-		
-		var currentStructId = 0;
-
-		function newStructure(areaId, type, area, owner, value, locked, amenities, options)
-		{
-			var r = { id: currentStructId, type: type, inArea: area, ...structureTypes[type], value: value, owner: owner, visited: false };
-			currentStructId++;
-			if (locked !== null) { r.isLocked = locked };
-			for (var key in options)
-			{
-				r[key] = options[key];
-			}
-			r.amenities = [];
-			if (Array.isArray(amenities) && amenities.length > 0)
-			{
-				r.amenities.push(...amenities);
-			}
-
-			structures.push(r);
-			var name = getStructureDisplayName(r);
-			var newAreaId = area + '_struct_' + ((areaId !== null) ? areaId : r.id);
-			areas.push(newArea(
-				newAreaId, name,
-				[
-					newFeature('STRUCT_EXIT', 0, {displayName: 'Exit ' + name, description: 'The exit for the ' + name + '.', toArea: area}),
-					...amenities],
-				[],
-				(options.hasOwnProperty('description')) ? options.description : ''
-			));
-			r.areaId = newAreaId;
-			return r;
-		}
-
-		var currentFeatureId = 0;
-		function newFeature(type, level, options)
-		{
-			var r = { id: currentFeatureId, type: type, ...featureTypes[type] };
-			currentFeatureId++;
-			r.level = (level !== null && level !== undefined) ? level : 0;
-			
-			for (var key in options)
-			{
-				r[key] = options[key];
-			}
-			features.push(r);
-			return r;
-		}
-		
-		function newExit(direction, text, accessibleText, toArea, time, stamina, conditions)
-		{
-			return {
-				direction: direction,
-				text: text,
-				accessibleText: accessibleText,
-				toArea: toArea, 
-				time: time,
-				stamina: stamina,
-				conditions: conditions
-			};
-		}
-		
-		var currentNpcId = 0;
-		function newNpc(firstName, lastName, age, sex, description, appearance, schedule = null, personal = null)
-		{
-			var npc = {
-				id: currentNpcId,
-				firstName: firstName,
-				lastName: lastName,
-				age: age,
-				sex: sex,
-				description: description,
-				appearance: appearance,
-				schedule: schedule,
-				personalPreferences: personal,
-				characterRelationship: newNpcRelationship(0, 0),
-				conversationsToday: 0,
-				conversationsToDate: 0,
-				dialog: [],
-				currentActivity: null
-			};
-			currentNpcId++;
-			npcs.push(npc);
-			return npc;
-		}
-		function newNpcSchedule(area, activity, conditions)
-		{
-			return {
-				area: area,
-				activity: activity,
-				conditions: [...conditions]
-			};
-		}
-		function newNPCWorkSchedule(area)
-		{
-			return newNpcSchedule(area, 'WORKING', [function(){ return isStructureOpen(area);}]);
-		}
-		function newNpcDialog(text, responses, conditions, after = null)
-		{
-			return {
-				text: text,
-				responses: (responses !== null) ? [...responses] : [],
-				conditions: [...conditions],
-				after: after
-			};
-		}
-		function newNpcRelationship(level, partnerLevel)
-		{
-			return {
-				level: level,
-				partnerLevel: partnerLevel
-			};
-		}
-		function newQuest(id, name, description, rewards, triggers, conditions, onComplete)
-		{
-			var r = {
-				id: id,
-				name: name,
-				description: description,
-				rewards: rewards,
-				triggers: [...triggers],
-				conditions: [...conditions],
-				onComplete: onComplete,
-				status: questStatuses.NOTSTARTED
-			};
-			quests.push(r);
-			return r;
-		}
-	</script>
+	<script src="TextCity.js"></script> 
 	<script> // globals
-		var currentSave = {
-			characterState: {},
-			worldState: {},
-			structures: [],
-			features: [],
-			npcs: [],
-			gamePreferences: {},
-			lastDayFinished: 0,
-		};
-		var characterState = {};
-		var worldState = {};
-		var gamePreferences = {};
-		
-		var firstArea = true;
-		var calendarState = null;
-	
-		var selectedTabs = {};
-		var gameHasStarted = false;
-		
-		var structures = [];
-		var features = [];
-		var npcs = [];
-		var quests = [];
-	</script>
-	<script> //utility functions
-		function isToday(m, d)
-		{
-			var t = new Date();
-			var y = t.getFullYear();
-			var isday = new Date(y, m - 1, d);
-
-			return ((isday.getDate() == t.getDate())
-					&& (isday.getMonth() == t.getMonth())
-					&& (isday.getFullYear() == t.getFullYear()));
-		}
-		function rint(n)
-		{
-			return Math.floor(Math.random() * n);
-		}
-		function s(w)
-		{
-			return ((w == 1) ? '' : 's');
-		}
-		function n(w)
-		{
-			return ((['a', 'e', 'i', 'o', 'u'].includes(w.charAt(0).toLowerCase())) ? 'n' : '');
-		}
-		function ord(n)
-		{
-			var t = n % 10;
-			var h = n % 100;
-			if ((t == 1) && (h != 11))
-			{
-				return n + 'st';
-			}
-			if ((t == 2) && (h != 12))
-			{
-				return n + 'nd';
-			}
-			if ((t == 3) && (h != 13))
-			{
-				return n + 'rd';
-			}
-			return n + 'th';
-		}
-		function between(n, min, max, inclusive = true)
-		{
-			if (!inclusive)
-			{
-				return (n > min && n < max);
-			}
-			return (n >= min && n <= max);
-		}
-		
-		function ucaseName(n)
-		{
-			return n.charAt(0).toUpperCase() + n.slice(1);
-		}
-		function diminish(n, c)
-		{
-			return Math.floor((Math.sqrt((c * n) + 1) - 1) / 2);
-		}
-		function softcap(n, l)
-		{
-			return Math.min(n, l) + Math.floor(Math.min(n, l) * (Math.max(0, n - l) / 100));
-		}
-		function scrollTabs(el, direction)
-		{
-			var w = Math.floor(gameBox.offsetWidth / 2);
-			el.scroll({left: el.scrollLeft + (w * direction), top: 0, behavior: 'smooth'});
-		}
-		function roll(chance)
-		{
-			if (rint(100) + 1 <= chance)
-			{
-				return true;
-			}
-			return false;
-		}
-		function getRandomArrayValue(arr)
-		{
-			return arr[rint(arr.length)];
-		}
-		function getRandomWeightedResult(a, loot)
-		{
-			var totalWeight = 0;
-			var bonus = lootBonus;
-			if (Array.isArray(a))
-			{
-				for (var i=0;i<a.length;i++)
-				{
-					if (a[i].hasOwnProperty('weight'))
-					{
-						totalWeight += a[i].weight;
-						if ((loot) && (a[i].weight < 4)) { totalWeight += bonus; }
-					}
-				}
-				var weightIndex = rint(totalWeight);
-				var weightCursor = 0;
-				for (var i=0;i<a.length;i++)
-				{
-					if (a[i].hasOwnProperty('weight'))
-					{
-						weightCursor += a[i].weight;
-						if ((loot) && (a[i].weight < 4)){ weightCursor += bonus; }
-						if (weightIndex <= weightCursor) { return i; }
-					}
-				}
-			}
-			return null;
-		}
-		function deleteElement(el)
-		{
-			var e = g(el);
-			if ((e !== null) && (e != undefined))
-			{
-				e.parentNode.removeChild(e);
-				return true;
-			}
-			return false;
-		}
-		function serialize(ob)
-		{
-			return encodeURIComponent(JSON.stringify(ob));
-		}
-		function deserialize(str)
-		{
-			return JSON.parse(decodeURIComponent(str));
-		}
-		function encode(str)
-		{
-			return window.btoa(str);
-		}
-		function decode(str)
-		{
-			return window.atob(str);
-		}
-		function getFuncOrVar(ob, arg)
-		{
-			if (typeof ob === 'function')
-			{
-				if ((arg != null) && (arg != undefined))
-				{
-					return ob(arg);
-				}
-				return ob();
-			}
-			return ob;
-		}
-		function fixButtonTextWidths(el)
-		{
-			var butts = el.getElementsByTagName('button');
-			for (var i=0;i<butts.length;i++)
-			{
-				var butt = butts[i];
-				var butw = butt.clientWidth;
-				if (butw > 0)
-				{
-					var textw = butt.scrollWidth;
-
-					var scale = butw / textw * .9;
-					for (var s=0;s<butt.getElementsByTagName('span').length;s++)
-					{
-						var span = butt.getElementsByTagName('span')[s];
-						//span.style.webkitTransform = 'scaleX(' + scale + ')';
-						//span.style.transform = 'scaleX(' + scale + ')';
-						span.style.fontSize = (2.5 * scale) + 'vh';
-					}
-				}
-			}
-		}
-		function clamp(n, min, max)
-		{
-			return Math.max(min, Math.min(max, n));
-		}
-		function invDir(dir)
-		{
-			if (dir == directions.NORTH) { return directions.SOUTH; }
-			if (dir == directions.SOUTH) { return directions.NORTH; }
-			if (dir == directions.EAST) { return directions.WEST; }
-			if (dir == directions.WEST) { return directions.EAST; }
-		}
-	</script>
-	<script> // time functions
-		function addTime(minutes)
-		{
-			calendarState.minutes += minutes;
-			updateClock();
-		}
-		function setTime(hours, minutes)
-		{
-			calendarState.minutes = hm(hours, minutes);
-			updateDisplay();
-		}
-		function hm(hours, minutes = 0)
-		{
-			return hours * 60 + minutes;
-		}
-		function timeBetween(min, max, inclusive = true)
-		{
-			return between(calendarState.minutes, min, max, inclusive);
-		}
-		function isDayOfWeek(days)
-		{
-			if (days.includes(getDayOfWeek().code)) { return true; }
-			return false;
-		}
-		function wait(minutes)
-		{
-			addTime(minutes);
-			updateDisplay();
-		}
-	</script>
-	<script> // leveled descriptors
-		var sizeLevels = ['tiny', 'small', 'moderate', 'sizable', 'large', 'huge', 'immense'];
-	</script>
-	<script> // enums
-		function newEnum()
-		{
-			var r = {};
-			for(var i=0;i<arguments.length;i++)
-			{
-				r[arguments[i]] = i;
-			}
-			r.includes = function(s) {
-				for (var key in r)
-				{
-					if (key == s) { return true; }
-				}
-				return false;
-			};
-			Object.freeze(r);
-			return r;
-		}
-		var attractors = newEnum('DYED_HAIR');
-		var baitTypes = newEnum('BUG', 'LIVE', 'RICH', 'SHINY', 'STINKY', 'WORM');
-		var cookingFeatures = newEnum('CAMPFIRE', 'RANGE');
-		var fishingMethods = newEnum('NET', 'POT', 'ROD', 'TRAP');
-		var questStatuses = newEnum('NOTSTARTED', 'ACTIVE', 'AWARDED', 'COMPLETED');
-		var questTriggers = newEnum('GAININVENTORYITEM', 'LEARNRECIPE');
+		worldState.foragedThisWeek = [];
 	</script>
 	<script> // items
-		var items = {
+		modData.items = {
 			BEEF: {
 				id: 'BEEF',
 				displayName: 'beef',
@@ -1013,30 +467,7 @@
 		};
 	</script>
 	<script> // type definitions
-		var directions = {
-			NORTH: { abbrev: 'N', displayName: 'North', navButton: 'northNavButton', navButtonText: 'northNavButtonText'},
-			EAST: { abbrev: 'E', displayName: 'East', navButton: 'eastNavButton', navButtonText: 'eastNavButtonText'},
-			SOUTH: { abbrev: 'S', displayName: 'South', navButton: 'southNavButton', navButtonText: 'southNavButtonText'},
-			WEST: { abbrev: 'W', displayName: 'West', navButton: 'westNavButton', navButtonText: 'westNavButtonText'}
-		};
-		
-		var seasons = {
-			SPRING: { displayName: 'Spring', abbr: 'Spr' },
-			SUMMER: { displayName: 'Summer', abbr: 'Sum' },
-			FALL: { displayName: 'Fall', abbr: 'Fal' },
-			WINTER: { displayName: 'Winter', abbr: 'Win' }
-		};
-		var weekDays = [
-			{ id: 0, displayName: 'Monday', abbr: 'Mon', code: 'MO' },
-			{ id: 1, displayName: 'Tuesday', abbr: 'Tue', code: 'TU' },
-			{ id: 2, displayName: 'Wednesday', abbr: 'Wed', code: 'WE' },
-			{ id: 3, displayName: 'Thursday', abbr: 'Thu', code: 'TH' },
-			{ id: 4, displayName: 'Friday', abbr: 'Fri', code: 'FR' },
-			{ id: 5, displayName: 'Saturday', abbr: 'Sat', code: 'SA' },
-			{ id: 6, displayName: 'Sunday', abbr: 'Sun', code: 'SU' }
-		];
-		
-		var activities = {
+		modData.types.activities = {
 			CHILLING: {displayName: 'chilling'},
 			EATING: {displayName: 'eating'},
 			GAMING: {displayName: 'gaming'},
@@ -1051,49 +482,52 @@
 			WALKING_W: {displayName: 'walking west'},
 			WORKING: {displayName: 'working'}
 		};
-		
-		var dwellingTypes = {
-			NONE: { level: 0, displayName: 'None' },
-			TENT: { level: 1, displayName: 'Tent' },
-			HUT: { level: 2, displayName: 'Hut' },
-			SHACK: { level: 3, displayName: 'Shack', description: 'An old dilapidated shack.' },
-			HOVEL: { level: 4, displayName: 'Hovel' },
-			BUNG: { level: 5, displayName: 'Bungalow' },
-			COTTAGE: { level: 6, displayName: 'Cottage' },
-			HOUSE: { level: 7, displayName: 'House' },
-			ESTATE: { level: 8, displayName: 'Estate' },
-			VILLA: { level: 9, displayName: 'Villa' },
-			MANSION: { level: 10, displayName: 'Mansion' },
-			PALACE: { level: 11, displayName: 'Palace' }
+		modData.types.aesthetics = {
+			ALT: {displayName: 'alternative'},
+			CASUAL: {displayName: 'casual'},
+			CUTE: {displayName: 'cute'},
+			DAPPER: {displayName: 'dapper'},
+			HIPSTER: {displayName: 'hipster'},
+			NERDY: {displayName: 'nerdy'},
+			RUSTIC: {displayName: 'rustic'}
 		};
-
-		var fishTypes = {
-			BLUEGILL: { level: 0, displayName: 'Bluegill', methods: [fishingMethods.ROD], favoriteBaits: [baitTypes.WORM], peakTime: 6, spring: 50, summer: 35, fall: 10, winter: 5 },
-			CRAYFISH: { level: 0, displayName: 'Crayfish', methods: [fishingMethods.POT, fishingMethods.ROD], favoriteBaits: [baitTypes.RICH], peakTime: 24, spring: 5, summer: 90, fall: 5, winter: 0 },
-			FATHEAD: { level: 0, displayName: 'Fathead Minnow', methods: [fishingMethods.TRAP], favoriteBaits: [baitTypes.STINKY], peakTime: 18, spring: 10, summer: 70, fall: 10, winter: 10 }
+		modData.types.bodies = {
+			AVERAGE: {displayName: 'average'},
+			CHUBBY: {displayName: 'chubby'},
+			CURVY: {displayName: 'curvy'},
+			DADBOD: {displayName: 'dad bod'},
+			FIT: {displayName: 'fit'},
+			THIN: {displayName: 'thin'}
 		};
-		var waterTypes = {
-			POND: { level: 1, displayName: 'Pond' }
+		modData.types.eyeColors = {
+			BLUE: {displayName: 'blue'},
+			BROWN: {displayName: 'brown'},
+			GREEN: {displayName: 'green'},
+			HAZEL: {displayName: 'hazel'}
 		};
-		var structureTypes = {
-			DWELL: { dwellingType: dwellingTypes.NONE, enterAction: 'Enter %%', exitAction: 'Leave %%' },
-			SHOP: { enterAction: 'Enter %%', exitAction: 'Leave %%', isLocked: function() { return !between(calendarState.minutes, hm(8, 59), hm(17), false); } }
-		};
-		var featureTypes = {
-			STRUCT_EXIT: { },
-			CAMPFIRE: { displayName: 'Camp Fire', description: 'A circle of rocks that you can load wood into and make a fire. Good for roasting marshmallows, and preparing rustic food.' },
+		//TODO come up with some way for different cooking features to modify results or limit by recipe
+		modData.types.features = {
+			...modData.types.features,
+			CAMPFIRE: { displayName: 'Camp Fire',
+				description: 'A circle of rocks that you can load wood into and make a fire. Good for roasting marshmallows, and preparing rustic food.',
+				options: { canCook: true }},
 			DEBRIS: { displayName: 'Debris', description: function(f){ return getDebrisDescription(f.level); } },
 			ITEM: { canPickUp: false, canPurchase: false },
 			SIGN: { displayName: 'Sign'},
-			SLEEPINGBAG: { displayName: 'Sleeping Bag', description: 'A basic sleeping system. It works, but you won\'t feel totally refreshed after sleeping here.' },
+			SLEEPINGBAG: { displayName: 'Sleeping Bag',
+				description: 'A basic sleeping system. It works, but you won\'t feel totally refreshed after sleeping here.' },
 			WATER: { displayName: function(f){ return f.waterType.displayName; } }
 		};
-		
-		var forageTypes = {
-			BLACKBERRY: {displayName: 'Blackberry Bush', description: 'A wild blackberry bush riddled with sharp thorns. In the summer, this bush is lush with dark, sweet, berries.', item: items.BLACKBERRY, minQuantity: 20, maxQuantity: 40, conditions: [function(){return calendarState.season == seasons.SUMMER;}]}
+		modData.types.fish = {
+			BLUEGILL: { level: 0, displayName: 'Bluegill', methods: [fishingMethods.ROD], favoriteBaits: [baitTypes.WORM], peakTime: 6, spring: 50, summer: 35, fall: 10, winter: 5 },
+			CATFISH: { level: 0, displayName: 'Catfish', methods: [fishingMethods.ROD], favoriteBaits: [baitTypes.WORM], peakTime: 6, spring: 35, summer: 25, fall: 35, winter: 5 },
+			CRAYFISH: { level: 0, displayName: 'Crayfish', methods: [fishingMethods.POT, fishingMethods.ROD], favoriteBaits: [baitTypes.RICH], peakTime: 24, spring: 5, summer: 90, fall: 5, winter: 0 },
+			FATHEAD: { level: 0, displayName: 'Fathead Minnow', methods: [fishingMethods.TRAP], favoriteBaits: [baitTypes.STINKY], peakTime: 18, spring: 10, summer: 70, fall: 10, winter: 10 }
 		};
-		var sexes = ['female', 'male'];
-		var hairColors = {
+		modData.types.forageables = {
+			BLACKBERRY: {displayName: 'Blackberry Bush', description: 'A wild blackberry bush riddled with sharp thorns. In the summer, this bush is lush with dark, sweet, berries.', item: modData.items.BLACKBERRY, minQuantity: 20, maxQuantity: 40, conditions: [function(){return calendarState.season == seasons.SUMMER;}]}
+		};
+		modData.types.hairColors = {
 			AUBURN: {displayName: 'auburn'},
 			BLACK: {displayName: 'black'},
 			BLONDE: {displayName: 'blonde'},
@@ -1106,7 +540,7 @@
 			PINK: {displayName: 'pink'},
 			PURPLE: {displayName: 'purple'}
 		};
-		var naturalHairColors = [
+		modData.types.hairColorsNatural = [
 			'AUBURN',
 			'BLACK',
 			'BLONDE',
@@ -1115,7 +549,7 @@
 			'RED',
 			'WHITE'
 		];
-		var hairStyles = {
+		modData.types.hairStyles = {
 			AFRO: {displayName: 'afro'},
 			BOB: {displayName: 'bob cut'},
 			BUN: {displayName: 'bun'},
@@ -1129,622 +563,325 @@
 			PONYUNDER: {displayName: 'undercut pony'},
 			SPACEBUNS: {displayName: 'space buns'}
 		};
-		var eyeColors = {
-			BLUE: {displayName: 'blue'},
-			BROWN: {displayName: 'brown'},
-			GREEN: {displayName: 'green'},
-			HAZEL: {displayName: 'hazel'}
-		};
-		var aesthetics = {
-			ALT: {displayName: 'alternative'},
-			CASUAL: {displayName: 'casual'},
-			CUTE: {displayName: 'cute'},
-			DAPPER: {displayName: 'dapper'},
-			HIPSTER: {displayName: 'hipster'},
-			NERDY: {displayName: 'nerdy'},
-			RUSTIC: {displayName: 'rustic'}
-		};
-		var heights = {
+		modData.types.heights = {
 			TALL: {displayName: 'tall'},
 			AVERAGE: {displayName: 'average'},
 			SHORT: {displayName: 'short'}
 		};
-		var bodyTypes = {
-			AVERAGE: {displayName: 'average'},
-			CHUBBY: {displayName: 'chubby'},
-			CURVY: {displayName: 'curvy'},
-			DADBOD: {displayName: 'dad bod'},
-			FIT: {displayName: 'fit'},
-			THIN: {displayName: 'thin'}
+		modData.types.structures = {
+			...modData.types.structures,
+			SHOP: { enterAction: 'Enter %%', exitAction: 'Leave %%', isLocked: function() { return !between(calendarState.minutes, hm(8, 59), hm(17), false); } },
+			TENT: { level: 1, displayName: 'Tent' },
+			HUT: { level: 2, displayName: 'Hut' },
+			SHACK: { level: 3, displayName: 'Shack' },
+			HOVEL: { level: 4, displayName: 'Hovel' },
+			BUNG: { level: 5, displayName: 'Bungalow' },
+			COTTAGE: { level: 6, displayName: 'Cottage' },
+			HOUSE: { level: 7, displayName: 'House' },
+			ESTATE: { level: 8, displayName: 'Estate' },
+			VILLA: { level: 9, displayName: 'Villa' },
+			MANSION: { level: 10, displayName: 'Mansion' },
+			PALACE: { level: 11, displayName: 'Palace' }
 		};
-	
+		modData.types.waters = {
+			POND: { level: 1, displayName: 'Pond' }
+		};
 	</script>
 	<script> // recipes
-		var recipes = [
-			{
-				id: 'BREAD_CAMPFIRE',
-				displayName: 'campfire bread',
-				action: 'Bake Bread',
-				ingredients: [newItemStack('DOUGH_BASIC', 0, 1)],
-				result: newItemStack('BREAD_CAMPFIRE', 0, 1),
-				time: 30
-			},
-			{
-				id: 'DOUGH_BASIC',
-				displayName: 'basic dough',
-				action: 'Knead Dough',
-				ingredients: [newItemStack('FLOUR_WHEAT', 0, 1), newItemStack('YEAST', 0, 1)],
-				result: newItemStack('DOUGH_BASIC', 0, 1),
-				time: 30
-			},
-			{
-				id: 'KABOB_STEAK',
-				displayName: 'steak kabob',
-				action: 'Roast Kabob',
-				ingredients: [newItemStack('BEEF', 0, 1)],
-				result: newItemStack('KABOB_STEAK', 0, 1),
-				time: 10
-			},
-			{
-				id: 'MARSHMALLOW_ROASTED',
-				displayName: 'roasted marshmallow',
-				action: 'Roast Marshmallow',
-				ingredients: [newItemStack('MARSHMALLOW', 0, 1)],
-				result: newItemStack('MARSHMALLOW_ROASTED', 0, 1),
-				time: 2
-			},
-			{
-				id: 'BURGER_RUSTIC',
-				displayName: 'rustic burger',
-				action: 'Assemble Burger',
-				ingredients: [newItemStack('BREAD_CAMPFIRE', 0, 1), newItemStack('KABOB_STEAK', 0, 1)],
-				result: newItemStack('BURGER_RUSTIC', 0, 1),
-				time: 2
-			}
-		];
+		//newRecipe (id, displayName, action, ingredients, result, time)
+		//TODO add cookingFeatures list to each recipe
+		newRecipe('BREAD_CAMPFIRE', 'campfire bread', 'Bake Bread', [newItemStack('DOUGH_BASIC', 0, 1)], newItemStack('BREAD_CAMPFIRE', 0, 1), 30);
+		newRecipe('DOUGH_BASIC', 'basic dough', 'Knead Dough', [newItemStack('FLOUR_WHEAT', 0, 1), newItemStack('YEAST', 0, 1)], newItemStack('DOUGH_BASIC', 0, 1), 30);
+		newRecipe('KABOB_STEAK', 'steak kabob', 'Roast Kabob', [newItemStack('BEEF', 0, 1)], newItemStack('KABOB_STEAK', 0, 1), 10);
+		newRecipe('MARSHMALLOW_ROASTED', 'roasted marshmallow', 'Roast Marshmallow', [newItemStack('MARSHMALLOW', 0, 1)], newItemStack('MARSHMALLOW_ROASTED', 0, 1), 2);
+		newRecipe('BURGER_RUSTIC', 'rustic burger', 'Assemble Burger', [newItemStack('BREAD_CAMPFIRE', 0, 1), newItemStack('KABOB_STEAK', 0, 1)], newItemStack('BURGER_RUSTIC', 0, 1), 2);
 	</script>
-	<script> // area functions
-		function getArea(id)
-		{
-			if (typeof(id) == 'object') { return id; }
-			for (var i=0;i<areas.length;i++)
-			{
-				if (areas[i].id.toLowerCase() == id.toLowerCase())
+	<script> // areas
+		// newArea(id, name, feats, exits, onEnter)
+		newArea(
+			'HOMEPROP', 'Home Property',
+			[
+				newFeature('DEBRIS', 1),
+				newFeature('DEBRIS', 2),
+				newFeature('DEBRIS', 3),
+				newFeature('DEBRIS', 4)
+			],
+			[
+				newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDW', 5, 0, null),
+				newExit(directions.SOUTH, '%HOMEPROPNAME% Farm', 'South to %HOMEPROPNAME% Farm', 'HOMEFARM', 5, 0, function() {return !areaHasFeatureType(characterState.currentArea, 'DEBRIS');})
+			],
+			'Welcome Home!'
+		),
+		newArea(
+			'HOMEFARM', '%HOMEPROPNAME% Farm',
+			[
+				newFeature('DEBRIS', 3),
+				newFeature('DEBRIS', 4),
+				newFeature('WATER', 0, {waterType: modData.types.waters.POND, noDelete: true, description: 'A nice-sized pond. You remember swimming here as a child. Maybe there are still fish here.'}),
+				newFeature('ITEM', 0, {displayName: 'Rusty Shovel', description: 'Someone left an old shovel here. It could come in handy.', actions: [ { actionFunction: function(){clickActionButton(this, pickupTool);}, text: 'Take', accessibleText: 'Take Rusty Shovel', attr: {tool: 'shovel', level: 1} }] })
+			],
+			[
+				newExit(directions.NORTH, '%HOMEPROPNAME%', 'North to %HOMEPROPNAME%', 'HOMEPROP', 5, 0, null)
+			],
+			'' 
+		),
+		newArea(
+			'OLDFARMRDW', 'Old Farm Rd West',
+			[
+				newFeature('FORAGE', 0, {...modData.types.forageables.BLACKBERRY})
+			],
+			[
+				newExit(directions.WEST, '%HOMEPROPNAME%', 'West to %HOMEPROPNAME%', 'HOMEPROP', 5, 0, null),
+				newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDE', 20, 0, null)
+			],
+			function(args) {
+				var r = 'West end of Old Farm Road.';
+				if (args !== null && args !== undefined)
 				{
-					return areas[i];
-				}
-			}
-			return null;
-		}
-		function inspectArea(areaButton)
-		{
-			var a = getArea(areaButton.getAttribute('data-areaid'));
-			if (a.hasOwnProperty('description'))
-			{
-				addNarrationMessage(handleWildcards(getFuncOrVar(a.description)));
-			}
-			else if (a.hasOwnProperty('onEnter'))
-			{
-				addNarrationMessage(handleWildcards(getFuncOrVar(a.onEnter)));
-			}
-			else
-			{
-				addNarrationMessage('No description available.');
-			}
-		}
-		function setCurrentArea(id, fromExit)
-		{
-			var area = getArea(id);
-			characterState.currentArea = id;
-			clearNarrationBox();
-			if (area.hasOwnProperty('onEnter'))
-			{
-				var enterText = getFuncOrVar(area.onEnter, {fromExit: fromExit});
-				if (enterText === null || enterText === undefined) { enterText = getFuncOrVar(area.name); }
-				addNarrationMessage(enterText);
-			}
-
-			if (firstArea)
-			{
-				addNarrationMessage('Use the (N:, E:, S:, W:) Navigation buttons to traverse the world\'s different areas.');
-				addNarrationMessage('Some areas have a list of features that you can interact with using the controls below the navigation.');
-				addNarrationMessage('Actions require time and stamina, be wary of the time of day and your stamina.');
-				addNarrationMessage('Make it home by bedtime each night or you wont be well rested for the next day. Run out of stamina and you\'ll be too tired to do any work.');
-				firstArea = false;
-			}
-			
-			if (areaHasDebris(area))
-			{
-				addNarrationMessage('You\'ll need to clear out this debris before you start working here.');
-			}
-			if (gamePreferences.areaTabOnTravel)
-			{
-				selectTab('tabBox', 'area', 'maintabs', g('mainTab_Area'));
-			}
-			updateDisplay();
-		}
-		function areaHasDebris(area)
-		{
-			var a = getArea(area);
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (a.features[i].type == 'DEBRIS')
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		function areaHasNonDebrisFeatures(area)
-		{
-			var a = getArea(area);
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (a.features[i].type != 'DEBRIS')
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		function getDebrisDescription(level)
-		{
-			var adjs = [...sizeLevels];
-			var a = adjs[Math.min(level, adjs.length-1)];
-			return 'A' + n(a) + ' ' + a + ' pile of debris. You\'ll have to clear this out before you can do any work or access any features here.';
-		}
-		function getFeature(id)
-		{
-			for (var i=0;i<features.length;i++)
-			{
-				if (features[i].id == id)
-				{
-					return features[i];
-				}
-			}
-			return null;
-		}
-		function getAreaFeaturesByType(area, featureType)
-		{
-			var a = getArea(area);
-			var r = [];
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (a.features[i].type == featureType)
-				{
-					r.push(a.features[i]);
-				}
-			}
-			return r;
-		}
-
-		function getFeatureDisplayName(f)
-		{
-			var n = f.displayName;
-			if (f.type == 'ITEM' && f.hasOwnProperty('itemStack'))
-			{
-				n = getItem(f.itemStack.item).displayName;
-			}
-			return handleWildcards(getFuncOrVar(n, f));
-		}
-		function tryClearDebris(stamina, time, area, feature)
-		{
-			if (testStamina(stamina, DEFAULT_STAMINA_MESSAGE, false))
-			{
-				if (testTime(time, true, true))
-				{
-					addAlertNarration('Debris cleared.' + ((time > 60) ? ' Whew!' : ''));
-					addStamina(-stamina);
-					deleteFeature(area, feature);
-					if (!areaHasDebris(area))
+					switch (invDir(args.fromExit.direction))
 					{
-						addAlertNarration('All debris has been cleared! New features and paths may now be accessible.');
+						case directions.WEST:
+							r += ' Looks like it isn\'t well travelled.';
+							break;
+						case directions.EAST:
+							r += ' You can see your family\'s old property from here.';
+							break;
 					}
 				}
+				return r;
 			}
-		}
-		function deleteFeature(area, feature)
-		{
-			var a = getArea(area);
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (a.features[i].id == feature)
+		),
+		newArea(
+			'OLDFARMRDE', 'Old Farm Rd East',
+			[],
+			[
+				newExit(directions.WEST, 'Old Farm rd', 'West on Old Farm road', 'OLDFARMRDW', 20, 0, null),
+				newExit(directions.EAST, 'Smalltown', 'East to Smalltown', 'STOWN_W', 5, 0, null),
+				newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Rd', 'RANCHRDN', 20, 0, null)
+			],
+			function(args) {
+				var r = 'East end of Old Farm Road.';
+				if (args !== null && args !== undefined)
 				{
-					a.features.splice(i, 1);
-				}
-			}
-			for (var i=0;i<features.length;i++)
-			{
-				if (features[i].id == feature)
-				{
-					features.splice(i, 1);
-				}
-			}
-			updateFeatureTable(a);
-		}
-		
-		function getAreaCookingFeatures(area)
-		{
-			var a = getArea(area);
-			var r = [];
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (cookingFeatures.includes(a.features[i].type))
-				{
-					r.push(a.features[i]);
-				}
-			}
-			return r;
-		}
-		function canCookRecipeInArea(recipe, area)
-		{
-			if (recipe != null && recipe != undefined && recipe != '')
-			{
-				var a = getArea(area);
-				var r = getRecipe(recipe);
-				var feats = getAreaCookingFeatures(a);
-				if (feats.length > 0)
-				{
-					if (!r.hasOwnProperty('cookingFeatures')) { return true; }
-					for (var x=0;x<feats.length;x++)
+					switch (invDir(args.fromExit.direction))
 					{
-						for (var y=0;y<r.cookingFeatures.length;y++)
-						{
-							if (r.cookingFeatures[y] == feats[x].type) { return true; }
-						}
+						case directions.WEST:
+							r += ' You can see Smalltown at the end of the road.';
+							break;
 					}
 				}
+				return r;
 			}
-			return false;
-		}
-		function updateAreaTable(a)
-		{
-			var x = g('areaTableBody');
-			x.innerHTML = '';
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var actionTd = ce('td');
-			nameTd.innerHTML = handleWildcards(getFuncOrVar(a.name));
-			actionTd.appendChild(makeButton('ochreButton', function(){wait(1);}, '1m', 'Wait 1 minute'));
-			actionTd.appendChild(makeButton('ochreButton', function(){wait(5);}, '5m', 'Wait 5 minutes'));
-			actionTd.appendChild(makeButton('ochreButton', function(){wait(30);}, '30m', 'Wait 30 minutes'));
-			actionTd.appendChild(makeButton('ochreButton', function(){inspectArea(this);}, INSPECT_ICON, 'Inspect ' + handleWildcards(getFuncOrVar(a.name)), {areaId: a.id}));
-			row.appendChild(nameTd);
-			row.appendChild(actionTd);
-			x.appendChild(row);
-		}
-		function updateStructuresTable(a)
-		{
-			var x = g('areaStructuresBody');
-			x.innerHTML = '';
-			g('structuresTable').style.display = 'none';
-			for (var i=0;i<structures.length;i++)
-			{
-				if (structures[i].inArea == a.id)
+		),
+		newArea(
+			'RANCHRDN', 'Ranch rd North',
+			[],
+			[
+				newExit(directions.NORTH, 'Old Farm rd', 'North to Old Farm Rd East', 'OLDFARMRDE', 20, 0, null),
+				newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Road', 'RANCHRDS', 20, 0, null)
+			],
+			'Ranch Road North'
+		),
+		newArea(
+			'RANCHRDS', 'Ranch rd South',
+			[],
+			[
+				newExit(directions.NORTH, 'Ranch Rd', 'North on Ranch Road', 'RANCHRDN', 20, 0, null),
+				newExit(directions.WEST, 'Emma\'s Ranch', 'West to Emma\'s Ranch', 'EMMARANCH', 10, 0, null)
+			],
+			'Ranch Road South'
+		),
+		newArea(
+			'EMMARANCH', 'Emma\'s Ranch',
+			[],
+			[
+				newExit(directions.EAST, 'Ranch Rd', 'East to Ranch Road', 'RANCHRDS', 10, 0, null)
+			],
+			'Emma\'s Ranch, you can buy live stock and other ranching goods here.'
+		),
+		newArea(
+			'STOWN_PL', 'Smalltown Plaza',
+			[
+				newFeature('SIGN', 0, {displayName: 'Plaza Guide', text: [UP_ARROW + ' North to Smalltown Jr. College', LEFT_ARROW + ' West to Old Farm Road', DOWN_ARROW + ' South to Shell Beach']}),
+				newFeature('ITEM', 0, {displayName: 'Fountain', description: 'A large, marble fountain.',
+					actions: [{ actionFunction: function(){
+													if (testMoney(1, DEFAULT_MONEY_MESSAGE, true))
+													{
+														addAlertNarration('Ploop.');
+														if (characterState.boon < 1) { addBoon(); }
+													}
+												},
+						text: 'Toss a coin', accessibleText: 'Toss a coin into the fountain' }] })
+			],
+			[
+				newExit(directions.NORTH, 'Smalltown North', 'North to Smalltown North', 'STOWN_N', 5, 0, null),
+				newExit(directions.EAST, 'Smalltown East', 'East to Smalltown East', 'STOWN_E', 5, 0, null),
+				newExit(directions.SOUTH, 'Smalltown South', 'South to Smalltown South', 'STOWN_S', 5, 0, null),
+				newExit(directions.WEST, 'Smalltown West', 'West to Smalltown West', 'STOWN_W', 5, 0, null)
+			],
+			'Smalltown Plaza, the town center, where the action is. Check the Plaza Guide for directions.'
+		),
+		newArea(
+			'STOWN_N', 'Smalltown North',
+			[],
+			[
+				newExit(directions.EAST, 'Smalltown JC', 'East to Smalltown junior college', 'STOWN_JC', 5, 0, null),
+				newExit(directions.SOUTH, 'Smalltown Plaza', 'South to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
+				newExit(directions.WEST, 'Cottage Rd', 'West on Cottage Road', 'STOWN_RES1', 5, 0, null)
+			],
+			'The northern edge of Smalltown'
+		),
+		newArea(
+			'STOWN_E', 'Smalltown East',
+			[],
+			[
+				newExit(directions.WEST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
+			],
+			'The eastern edge of Smalltown'
+		),
+		newArea(
+			'STOWN_S', 'Smalltown South',
+			[],
+			[
+				newExit(directions.NORTH, 'Smalltown Plaza', 'North to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
+				newExit(directions.SOUTH, 'Shell Beach', 'South to Shell Beach', 'STOWN_B', 5, 0, null)
+			],
+			function(args) {
+				var r = 'The southern edge of Smalltown.';
+				if (args !== null && args !== undefined)
 				{
-					g('structuresTable').style.display = 'table';
-					var struct = structures[i];
-
-					var row = ce('tr');
-					var nameTd = ce('td');
-					var actionTd = ce('td');
-					var n = getStructureDisplayName(struct);
-					nameTd.innerHTML = n;
-					if (getFuncOrVar(struct.isLocked))
+					switch (invDir(args.fromExit.direction))
 					{
-						actionTd.appendChild(makeFeatureActionButton(function(){clickActionButton(this, tryEnterStructure);}, LOCK_ICON, n + ' is locked', { area: a.id, structure: struct.id }));
-					}
-					else
-					{
-						actionTd.appendChild(makeFeatureActionButton(function(){clickActionButton(this, tryEnterStructure);}, 'Enter', 'Enter ' + n, { area: a.id, structure: struct.id }));
-					}
-					actionTd.appendChild(makeStructureInspectbutton(struct));
-					row.appendChild(nameTd);
-					row.appendChild(actionTd);
-					x.appendChild(row);
-				}
-			}
-		}
-		function updateAreaNpcsTable(a)
-		{
-			var x = g('areaNpcsBody');
-			x.innerHTML = '';
-			g('areaNpcsTable').style.display = 'none';
-			var ns = getPresentNpcs(a);
-			for (var i=0;i<ns.length;i++)
-			{
-				g('areaNpcsTable').style.display = 'table';
-				var n = ns[i];
-
-				var row = ce('tr');
-				var nameTd = ce('td');
-				var actionTd = ce('td');
-				nameTd.innerHTML = n.firstName + ((n.currentActivity !== null) ? ' (' + ucaseName(activities[n.currentActivity].displayName) + ')' : '');
-				actionTd.appendChild(makeButton('ochreButton', function(){talkToNpc(this);}, 'Talk', 'Talk to ' + n.firstName, {npcid: n.id}));
-				actionTd.appendChild(makeNpcInspectbutton(n));
-				row.appendChild(nameTd);
-				row.appendChild(actionTd);
-				x.appendChild(row);
-			}
-		}
-		function updateFeatureTable(a)
-		{
-			var x = g('areaFeaturesBody');
-			x.innerHTML = '';
-			g('featuresTable').style.display = 'none';
-			if (a.hasOwnProperty('features'))
-			{
-				for (var i=0;i<a.features.length;i++)
-				{
-					var feat = a.features[i];
-					var row = null;
-					if (testConditions(characterState, feat.conditions))
-					{
-						g('featuresTable').style.display = 'table';
-						if (feat.type == 'STRUCT_EXIT')
-						{
-							row = createFeatureRow(a, feat, { actionFunction: function(){clickActionButton(this, tryLeaveStructure);}, text: 'Exit', accessibleText: 'Exit', attr: { toArea: feat.toArea } });
-						}			
-						else
-						{
-							if (areaHasDebris(a))
-							{
-								switch (feat.type)
-								{
-									case 'DEBRIS':
-										row = createFeatureRow(a, feat, { actionFunction: function(){clickActionButton(this, clickClearDebrisButton);}, text: 'Clear Debris', accessibleText: 'Clear Debris', attr: { area: a.id, feature: feat.id } });
-										break;
-								}
-							}
-							else
-							{
-								var actions = [];
-								switch (feat.type)
-								{
-									case 'FORAGE':
-										if (!worldState.foragedThisWeek.includes(feat.id))
-										{
-											actions.push({ actionFunction: function(){clickActionButton(this, clickForageButton);}, text: 'Forage', accessibleText: 'Forage from ' + getFeatureDisplayName(feat), attr: { area: a.id, feature: feat.id} });
-										}
-										break;
-									case 'ITEM':
-										if (feat.hasOwnProperty('actions'))
-										{
-											for (var key in feat.actions)
-											{
-												var act = feat.actions[key];
-												actions.push({ actionFunction: act.actionFunction, text: act.text, accessibleText: act.accessibleText, attr: { area: a.id, feature: feat.id, ...act.attr} });
-											}
-										}
-										if (feat.hasOwnProperty('canPickUp') && feat.canPickUp)
-										{
-											actions.push({ actionFunction: function(){clickActionButton(this, clickTakeItemButton);}, text: 'Take', accessibleText: 'Take ' + getFeatureDisplayName(feat), attr: { area: a.id, feature: feat.id, itemId: feat.itemStack.item, itemLevel: feat.itemStack.level, itemQuantity: feat.itemStack.quantity } });
-										}
-										break;
-									case 'WATER':
-										actions.push({ actionFunction: function(){clickActionButton(this, clickFishButton);}, text: 'Fish', accessibleText: 'Fish in ' + getFeatureDisplayName(feat), attr: { area: a.id, feature: feat.id } });
-										break;
-								}
-								row = createFeatureRow(a, feat, actions);
-							}
-						}
-					}
-			
-					if (row != null)
-					{
-						x.appendChild(row);
+						case directions.NORTH:
+							r += ' Shell Beach is to the south.';
+							break;
 					}
 				}
+				return r;
 			}
-			else
-			{
-				g('featuresTable').style.display = 'none';
-			}
-		}
-		function createFeatureRow(a, feat, actions)
-		{
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var actionTd = ce('td');
-			nameTd.innerHTML = ucaseName(getFeatureDisplayName(feat));
-			if (feat.type == 'ITEM' && feat.canPurchase && feat.hasOwnProperty('itemStack'))
-			{
-				var price = ce('span');
-				price.innerHTML = ': $' + feat.itemStack.item.value;
-				nameTd.appendChild(price);
-			}
-			if (feat.level > 0)
-			{
-				nameTd.appendChild(renderStars(feat.level, true));
-			}			
-			if (actions !== null && actions !== undefined)
-			{
-				if (Array.isArray(actions))
+		),
+		newArea(
+			'STOWN_W', 'Smalltown West',
+			[],
+			[
+				newExit(directions.WEST, 'Old Farm rd', 'West to Old Farm road', 'OLDFARMRDE', 5, 0, null),
+				newExit(directions.EAST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
+			],
+			'The western edge of Smalltown'
+		),
+		newArea(
+			'STOWN_B', 'Shell Beach',
+			[],
+			[
+				newExit(directions.NORTH, 'Smalltown South', 'North to Smalltown South', 'STOWN_S', 5, 0, null),
+				newExit(directions.SOUTH, 'Pelican Pier', 'South to Pelican Pier', 'STOWN_D', 5, 0, null)
+			],
+			function(args) {
+				var r = 'Shell Beach.';
+				if (args !== null && args !== undefined)
 				{
-					for (var i=0;i<actions.length;i++)
+					switch (invDir(args.fromExit.direction))
 					{
-						actionTd.appendChild(makeFeatureActionButton(actions[i].actionFunction, actions[i].text, actions[i].accessibleText, actions[i].attr));
+						case directions.NORTH:
+							r += ' Lots of sand, waves and pelicans.';
+							break;
+						case directions.SOUTH:
+							r += ' Smalltown South is to the north.';
+							break;
 					}
 				}
-				else
-				{
-					actionTd.appendChild(makeFeatureActionButton(actions.actionFunction, actions.text, actions.accessibleText, actions.attr));
-				}
+				return r;
 			}
-			actionTd.appendChild(makeFeatureInspectbutton(feat));
-			row.appendChild(nameTd);
-			row.appendChild(actionTd);
-			return row;
-		}
-		function updateSaleItemsTable(area)
-		{
-			var x = g('saleItemsBody');
-			x.innerHTML = '';
-			if (areaHasSaleItems(area))
-			{
-				for (var i=0;i<area.features.length;i++)
-				{
-					var row = null;
-					var feat = area.features[i];
-					if (feat.type == 'ITEM' && feat.canPurchase && testConditions(characterState, feat.conditions))
-					{
-						g('saleItemsTable').style.display = 'table';
-						row = createFeatureRow(area, feat, [
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$', accessibleText: 'Buy 1 for $' + feat.itemStack.item.value, attr: { area: area.id, feature: feat.id, purchaseQuantity: 1 } },
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x5', accessibleText: 'Buy 5 for $' + (feat.itemStack.item.value * 5), attr: { area: area.id, feature: feat.id, purchaseQuantity: 5 } },
-								{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x10', accessibleText: 'Buy 10 for $' + (feat.itemStack.item.value * 10), attr: { area: area.id, feature: feat.id, purchaseQuantity: 10 } }
-							]);
-					}
-					if (row != null)
-					{
-						x.appendChild(row);
-					}
-				}
-			}
-			else
-			{
-				g('saleItemsTable').style.display = 'none';
-			}
-		}
-		function makeFeatureActionButton(action, buttonText, accessibleText, attr)
-		{
-			return makeButton('ochreButton', action, buttonText, accessibleText, attr)
-		}
-		function makeFeatureInspectbutton(feat)
-		{
-			return makeButton('ochreButton', function(){inspectFeature(this);}, INSPECT_ICON, 'Inspect ' + getFeatureDisplayName(feat), {featureId: feat.id});
-		}
-		function makeStructureInspectbutton(struct)
-		{
-			return makeButton('ochreButton', function(){inspectStructure(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(struct.displayName), {structureId: struct.id});
-		}
-		function makeNpcInspectbutton(n)
-		{
-			return makeButton('ochreButton', function(){inspectNpc(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(n.firstName), {npcId: n.id});
-		}
-
-		function tryTravel(exit)
-		{
-			clearNarrationBox();
-			if (testStamina(exit.stamina, 'You don\'t have the stamina for this trip.', false))
-			{
-				if (testTime(exit.time, true, false))
-				{
-					addStamina(-exit.stamina);
-					addTime(exit.time);
-					var a = getArea(exit.toArea);
-					setCurrentArea(exit.toArea, exit);
-				}
-			}
-		}
+		),
+		newArea(
+			'STOWN_D', 'Pelican Pier',
+			[],
+			[
+				newExit(directions.NORTH, 'Shell Beach', 'North to Shell Beach', 'STOWN_B', 5, 0, null)
+			],
+			'Pelican Pier, where most of Smalltown\'s fisherman spend their mornings.'
+		),
+		newArea(
+			'STOWN_JC', 'Smalltown Jr. College',
+			[],
+			[
+				newExit(directions.WEST, 'Smalltown North', 'West to Smalltown North', 'STOWN_N', 5, 0, null)
+			],
+			'Smalltown junior college, where Smalltown\'s youth get ready for the working force.'
+		),
+		newArea(
+			'STOWN_RES1', 'Cottage Rd',
+			[],
+			[
+				newExit(directions.EAST, 'Smalltown North', 'East to Smalltown North', 'STOWN_N', 5, 0, null)
+			],
+			'Cottage Road, several Smalltown residents live on this street.'
+		);
 	</script>
-	<script> // structure functions
-		function tryEnterStructure(button)
-		{
-			var id = button.getAttribute('data-structure');
-			if (!getFuncOrVar(structures[id].isLocked))
-			{
-				if (testTime(2, true, true))
-				{
-					enterStructure(id);
-				}
-			}
-			else
-			{
-				addAlertNarration(getStructureDisplayName(id) + ' is locked.');
-			}
-		}
-		function enterStructure(id)
-		{
-			var struct = structures[id];
-			setCurrentArea(struct.areaId, false);
-			clearNarrationBox();
-			addNarrationMessage('You enter ' + getStructureDisplayName(struct) + '.');
-			if (struct.hasOwnProperty('firstEnter') && !struct.visited)
-			{
-				addNarrationMessage(handleWildcards(struct.firstEnter));
-				struct.visited = true;
-			}
-			else
-			{
-				inspectStructure(struct);
-			}
-		}
-		function tryLeaveStructure(button)
-		{
-			var id = button.getAttribute('data-toarea');
-			if (testTime(2, true, true))
-			{
-				leaveStructure(id);
-			}
-		}
-		function leaveStructure(id)
-		{
-			setSubcontent('viewBox', 'currentArea');
-			setCurrentArea(id, null);
-		}
-		function getStructureDisplayName(s)
-		{
-			var struct = s;
-			if (typeof(struct) !== 'object')
-			{
-				struct = structures[s];
-			}
-			if (struct.type == 'DWELL')
-			{
-				return handleWildcards(getFuncOrVar(struct.dwellingType.displayName, struct));
-			}
-			else
-			{
-				return handleWildcards(getFuncOrVar(struct.displayName, struct));
-			}
-		}
-		function getStructureByAreaId(area)
-		{
-			for (var i=0;i<structures.length;i++)
-			{
-				if (structures[i].areaId == area)
-				{
-					return structures[i];
-				}
-			}
-			return null;
-		}
-		function isStructureOpen(area)
-		{
-			var s = getStructureByAreaId(area);
-			if (s !== null && s.hasOwnProperty('isLocked')) { return !getFuncOrVar(s.isLocked); }
-			return false;
-		}
-		function isStructureOwnedBy(area, owner)
-		{
-			var s = getStructureByAreaId(area);
-			return (s.owner.toLowerCase() == owner.toLowerCase());
-		}
+	<script> // structures
+		//"Fanciful Feldecarb Fountain flows full as fluttering fairies frolic fastidiously.  Flick a farthing?" 
+			//function newStructure(areaId, type, area, owner, value, locked, amenities, options)
+		newStructure('HOMESHACK', 'SHACK', 'HOMEPROP', null, 100, false,
+					[
+						newFeature('ITEM', 0, {canPickUp: true, canPurchase: false, itemStack: newItemStack('POT_OLD', 0, 1), onPickup: function(){ startQuest('COOKING_I'); }}),
+						newFeature('CAMPFIRE', 0),
+						newFeature('SLEEPINGBAG', 0)
+					],
+					{ displayName: 'An old dilapidated shack',
+						description: 'It looks like a squatter was living here. They left an old ratty sleeping bag and the remnants of a campfire.' }
+		);
+		newStructure('GARDENSHOP', 'SHOP', 'STOWN_PL', null, 1000000, null,
+					[
+						newFeature('ITEM', 0, {itemStack: newItemStack(modData.items.SPINACH_SEED, 0, 1), canPickUp: false, canPurchase: true, conditions: function() {return (calendarState.season === seasons.SPRING);} })
+					],
+					{ displayName: 'Avery\'s H&G',
+						description: 'Avery\'s Home & Garden stocks seasonal seeds and general garden goods.' }
+		);
+		newStructure('DOMSBAKERY', 'SHOP', 'STOWN_PL', 'dominic', 1000000, null,
+					[],
+					{ displayName: 'BPS Bakery',
+						description: 'The Bread Poet\'s Society, bakery and coffee shop. Open mic on thursday nights.' }
+		);
+		newStructure('CLAYSDELI', 'SHOP', 'STOWN_PL', 'clayton', 1000000, null,
+					[],
+					{ displayName: 'M&G Deli',
+						description: 'Meat and Greet delicatessen. Get your meats and other foods here.' }
+		).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
+		newStructure('GORDOSREST', 'SHOP', 'STOWN_E', 'luigi', 1000000, null,
+					[],
+					{ displayName: 'D\'Graisse\'s',
+						description: 'Smalltowns own fine dining establishment. Very good reviews online.' }
+		);
+		newStructure('EMMASSHOP', 'SHOP', 'EMMARANCH', null, 2000000, null,
+					[],
+					{ displayName: 'Emma\'s Feed',
+						description: 'Emma\'s Feed carries livestock, feed and ranching goods.' }
+		).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
+		newStructure('EMMAS_HOUSE', 'HOUSE', 'EMMARANCH', null, 1000000, true,
+					[],
+					{ noDelete: false, description: 'Emma\'s house.' }
+		);
+		newStructure('EMMARANCH_STAFF', 'BUNG', 'EMMARANCH', null, 10000, true,
+					[],
+					{ noDelete: false, description: 'On-site living for ranch hands.' }
+		);
+		newStructure('MARTIN_HOUSE', 'COTTAGE', 'STOWN_RES1', null, 250000, true,
+					[],
+					{ noDelete: false, description: 'The Martin Residence.' }
+		);
 	</script>
 	<script> // npcs
-		function newGameNpcs_Standard()
-		{
-			// newNpc(firstName, lastName, age, sex, description, appearance, schedule)
-			// newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
-			// newNpcSchedule(area, activity, conditions)
-			// weekdays[0] == monday
-			avery();
-			clayton();
-			dominic();
-			emma();
-			liam();
-			luigi();
-			mateo();
-			olivia();
-		}
+		// newNpc(firstName, lastName, age, sex, description, appearance, schedule)
+		// newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
+		// newNpcSchedule(area, activity, conditions)
+		// weekdays[0] == monday
 	</script>
 	<script> // NPC: Avery
 		function avery()
 		{
 			var avery = newNpc('Avery', 'Thompson', 29, 0,
 				'A edgy extrovert that is totes obsessed with plants and crystals.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.BLONDE, hairColors.BLUE, hairStyles.SPACEBUNS, eyeColors.HAZEL, aesthetics.ALT),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.BLONDE, modData.types.hairColors.BLUE, modData.types.hairStyles.SPACEBUNS, modData.types.eyeColors.HAZEL, modData.types.aesthetics.ALT),
 				[
 					newNPCWorkSchedule('STOWN_PL_struct_GARDENSHOP')
 				]
@@ -1756,7 +893,7 @@
 		{
 			var clayton = newNpc('Clayton', 'Lespool', 46, 1,
 				'A boisterous, friendly, guy with a salt-and-pepper beard. Likes to joke around and make friends. Loves a good pun.',
-				newCharacterAppearance(heights.TALL, bodyTypes.FIT, hairColors.GREY, hairColors.GREY, hairStyles.PONYLOW, eyeColors.BROWN, aesthetics.CASUAL),
+				newCharacterAppearance(modData.types.heights.TALL, modData.types.bodies.FIT, modData.types.hairColors.GREY, modData.types.hairColors.GREY, modData.types.hairStyles.PONYLOW, modData.types.eyeColors.BROWN, modData.types.aesthetics.CASUAL),
 				[
 					newNPCWorkSchedule('STOWN_PL_struct_CLAYSDELI'),
 					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return !isStructureOpen('STOWN_PL_struct_CLAYSDELI'); }])
@@ -1825,7 +962,7 @@
 		{
 			var dominic = newNpc('Dominic', 'Smith', 34, 1,
 				'Slender European hipster with a goatee and a love of sourdough bread.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.THIN, hairColors.BROWN, hairColors.BROWN, hairStyles.MANBUN, eyeColors.BLUE, aesthetics.HIPSTER),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.THIN, modData.types.hairColors.BROWN, modData.types.hairColors.BROWN, modData.types.hairStyles.MANBUN, modData.types.eyeColors.BLUE, modData.types.aesthetics.HIPSTER),
 				[
 					newNPCWorkSchedule('STOWN_PL_struct_DOMSBAKERY'),
 					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return !isStructureOpen('STOWN_PL_struct_DOMSBAKERY'); }])
@@ -1896,7 +1033,7 @@
 		{
 			var emma = newNpc('Emma', 'Brown', 25, 0,
 				'A bubbly young lass who dresses in rustic western apparel.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.CURVY, hairColors.BLONDE, hairColors.BLONDE, hairStyles.PONYHIGH, eyeColors.BLUE, aesthetics.RUSTIC),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.CURVY, modData.types.hairColors.BLONDE, modData.types.hairColors.BLONDE, modData.types.hairStyles.PONYHIGH, modData.types.eyeColors.BLUE, modData.types.aesthetics.RUSTIC),
 				[
 					newNPCWorkSchedule('EMMARANCH_struct_EMMASSHOP'),
 					newNpcSchedule('EMMAS_HOUSE', 'SLEEPING', [function(){ return !isStructureOpen('EMMARANCH_struct_EMMASSHOP'); }])
@@ -1909,7 +1046,7 @@
 		{
 			var liam = newNpc('Liam', 'O\'Doyle', 26, 1,
 				'A fiery ginger who likes to live life on the edge.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.RED, hairColors.RED, hairStyles.CREW, eyeColors.GREEN, aesthetics.CASUAL),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.RED, modData.types.hairColors.RED, modData.types.hairStyles.CREW, modData.types.eyeColors.GREEN, modData.types.aesthetics.CASUAL),
 				[
 					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return timeBetween(6*60, 18*60); }])
 				]);
@@ -1920,7 +1057,7 @@
 		{
 			var luigi = newNpc('Luigi', 'D\'Graisse', 30, 1,
 				'A loud, obnoxious, chef with a monstrous ego, but the skills to back it up.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.DADBOD, hairColors.BLONDE, hairColors.NBLONDE, hairStyles.CREW, eyeColors.BLUE, aesthetics.CASUAL),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.DADBOD, modData.types.hairColors.BLONDE, modData.types.hairColors.BLONDE, modData.types.hairStyles.CREW, modData.types.eyeColors.BLUE, modData.types.aesthetics.CASUAL),
 				[
 					newNPCWorkSchedule('STOWN_E_struct_GORDOSREST'),
 					newNpcSchedule('STOWN_E', 'CHILLING', [function(){ return !isStructureOpen('STOWN_E_struct_GORDOSREST'); }])
@@ -1962,12 +1099,12 @@
 		{
 			var mateo = newNpc('Mateo', 'Gonzalez', 23, 1,
 				'A quiet, hardworking fellow.',
-				newCharacterAppearance(heights.AVERAGE, bodyTypes.AVERAGE, hairColors.BROWN, hairColors.BROWN, hairStyles.CREW, eyeColors.BROWN, aesthetics.RUSTIC),
+				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.BROWN, modData.types.hairColors.BROWN, modData.types.hairStyles.CREW, modData.types.eyeColors.BROWN, modData.types.aesthetics.RUSTIC),
 				[
 					newNpcSchedule('EMMARANCH_STAFF', 'SLEEPING', [function(){ return !timeBetween(5*60, 13*60); }]),
 					newNpcSchedule('EMMARANCH', 'WORKING', [function(){ return !isDayOfWeek(['SA', 'SU']) && timeBetween(5*60, 13*60); }])
 				],
-				[bodyTypes.CURVY]);
+				[modData.types.bodies.CURVY]);
 		}
 	</script>
 	<script> // NPC: Olivia
@@ -1975,7 +1112,7 @@
 		{
 			var olivia = newNpc('Olivia', 'Martin',
 				22, 0, 'A short demure girl, with bangs and glasses. She\'d rather stay at home with her cat than go to parties.',
-				newCharacterAppearance(heights.SHORT, bodyTypes.THIN, hairColors.BLONDE, hairColors.BLACK, hairStyles.BOB, eyeColors.BLUE, aesthetics.ALT),
+				newCharacterAppearance(modData.types.heights.SHORT, modData.types.bodies.THIN, modData.types.hairColors.BLONDE, modData.types.hairColors.BLACK, modData.types.hairStyles.BOB, modData.types.eyeColors.BLUE, modData.types.aesthetics.ALT),
 				[
 					// sleeping
 					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'SLEEPING', [function(){ return isDayOfWeek(['MO', 'TU', 'WE']) && !timeBetween(hm(7, 30), hm(21, 30)); }]),
@@ -2023,1066 +1160,72 @@
 					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['FR', 'SA']) && timeBetween(hm(17, 1), hm(23, 59)); }]),
 					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['SU']) && timeBetween(hm(17, 1), hm(20, 59)); }]),
 				],
-				[aesthetics.ALT, bodyTypes.AVERAGE, eyeColors.GREEN]);
+				[modData.types.aesthetics.ALT, modData.types.bodies.AVERAGE, modData.types.eyeColors.GREEN]);
 		}
 	</script>
-	<script> // areas
-		var areas = [];
-		// newArea(id, name, feats, exits, onEnter)
-		var newGameAreas_Standard = [
-			newArea(
-				'HOMEPROP', 'Home Property',
-				[
-					newFeature('DEBRIS', 1),
-					newFeature('DEBRIS', 2),
-					newFeature('DEBRIS', 3),
-					newFeature('DEBRIS', 4)
-				],
-				[
-					newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDW', 5, 0, null),
-					newExit(directions.SOUTH, '%HOMEPROPMAME% Farm', 'South to %HOMEPROPMAME% Farm', 'HOMEFARM', 5, 0, function() {return !areaHasDebris(characterState.currentArea);})
-				],
-				'Welcome Home!'
-			),
-			newArea(
-				'HOMEFARM', '%HOMEPROPMAME% Farm',
-				[
-					newFeature('DEBRIS', 3),
-					newFeature('DEBRIS', 4),
-					newFeature('WATER', 0, {waterType: waterTypes.POND, noDelete: true, description: 'A nice-sized pond. You remember swimming here as a child. Maybe there are still fish here.'}),
-					newFeature('ITEM', 0, {displayName: 'Rusty Shovel', description: 'Someone left an old shovel here. It could come in handy.', actions: [ { actionFunction: function(){clickActionButton(this, pickupTool);}, text: 'Take', accessibleText: 'Take Rusty Shovel', attr: {tool: 'shovel', level: 1} }] })
-				],
-				[
-					newExit(directions.NORTH, '%HOMEPROPMAME%', 'North to %HOMEPROPMAME%', 'HOMEPROP', 5, 0, null)
-				],
-				'' 
-			),
-			newArea(
-				'OLDFARMRDW', 'Old Farm Rd West',
-				[
-					newFeature('FORAGE', 0, {...forageTypes.BLACKBERRY})
-				],
-				[
-					newExit(directions.WEST, '%HOMEPROPMAME%', 'West to %HOMEPROPMAME%', 'HOMEPROP', 5, 0, null),
-					newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDE', 20, 0, null)
-				],
-				function(args) {
-					var r = 'West end of Old Farm Road.';
-					if (args !== null && args !== undefined)
-					{
-						switch (invDir(args.fromExit.direction))
-						{
-							case directions.WEST:
-								r += ' Looks like it isn\'t well travelled.';
-								break;
-							case directions.EAST:
-								r += ' You can see your family\'s old property from here.';
-								break;
-						}
-					}
-					return r;
-				}
-			),
-			newArea(
-				'OLDFARMRDE', 'Old Farm Rd East',
-				[],
-				[
-					newExit(directions.WEST, 'Old Farm rd', 'West on Old Farm road', 'OLDFARMRDW', 20, 0, null),
-					newExit(directions.EAST, 'Smalltown', 'East to Smalltown', 'STOWN_W', 5, 0, null),
-					newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Rd', 'RANCHRDN', 20, 0, null)
-				],
-				function(args) {
-					var r = 'East end of Old Farm Road.';
-					if (args !== null && args !== undefined)
-					{
-						switch (invDir(args.fromExit.direction))
-						{
-							case directions.WEST:
-								r += ' You can see Smalltown at the end of the road.';
-								break;
-						}
-					}
-					return r;
-				}
-			),
-			newArea(
-				'RANCHRDN', 'Ranch rd North',
-				[],
-				[
-					newExit(directions.NORTH, 'Old Farm rd', 'North to Old Farm Rd East', 'OLDFARMRDE', 20, 0, null),
-					newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Road', 'RANCHRDS', 20, 0, null)
-				],
-				'Ranch Road North'
-			),
-			newArea(
-				'RANCHRDS', 'Ranch rd South',
-				[],
-				[
-					newExit(directions.NORTH, 'Ranch Rd', 'North on Ranch Road', 'RANCHRDN', 20, 0, null),
-					newExit(directions.WEST, 'Emma\'s Ranch', 'West to Emma\'s Ranch', 'EMMARANCH', 10, 0, null)
-				],
-				'Ranch Road South'
-			),
-			newArea(
-				'EMMARANCH', 'Emma\'s Ranch',
-				[],
-				[
-					newExit(directions.EAST, 'Ranch Rd', 'East to Ranch Road', 'RANCHRDS', 10, 0, null)
-				],
-				'Emma\'s Ranch, you can buy live stock and other ranching goods here.'
-			),
-			newArea(
-				'STOWN_PL', 'Smalltown Plaza',
-				[
-					newFeature('SIGN', 0, {displayName: 'Plaza Guide', text: [UP_ARROW + ' North to Smalltown Jr. College', LEFT_ARROW + ' West to Old Farm Road', DOWN_ARROW + ' South to Shell Beach']}),
-					newFeature('ITEM', 0, {displayName: 'Fountain', description: 'A large, marble fountain.',
-						actions: [{ actionFunction: function(){
-														if (testMoney(1, DEFAULT_MONEY_MESSAGE, true))
-														{
-															addAlertNarration('Ploop.');
-															if (characterState.boon < 1) { addBoon(); }
-														}
-													},
-							text: 'Toss a coin', accessibleText: 'Toss a coin into the fountain' }] })
-				],
-				[
-					newExit(directions.NORTH, 'Smalltown North', 'North to Smalltown North', 'STOWN_N', 5, 0, null),
-					newExit(directions.EAST, 'Smalltown East', 'East to Smalltown East', 'STOWN_E', 5, 0, null),
-					newExit(directions.SOUTH, 'Smalltown South', 'South to Smalltown South', 'STOWN_S', 5, 0, null),
-					newExit(directions.WEST, 'Smalltown West', 'West to Smalltown West', 'STOWN_W', 5, 0, null)
-				],
-				'Smalltown Plaza, the town center, where the action is. Check the Plaza Guide for directions.'
-			),
-			newArea(
-				'STOWN_N', 'Smalltown North',
-				[],
-				[
-					newExit(directions.EAST, 'Smalltown JC', 'East to Smalltown junior college', 'STOWN_JC', 5, 0, null),
-					newExit(directions.SOUTH, 'Smalltown Plaza', 'South to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
-					newExit(directions.WEST, 'Cottage Rd', 'West on Cottage Road', 'STOWN_RES1', 5, 0, null)
-				],
-				'The northern edge of Smalltown'
-			),
-			newArea(
-				'STOWN_E', 'Smalltown East',
-				[],
-				[
-					newExit(directions.WEST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
-				],
-				'The eastern edge of Smalltown'
-			),
-			newArea(
-				'STOWN_S', 'Smalltown South',
-				[],
-				[
-					newExit(directions.NORTH, 'Smalltown Plaza', 'North to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
-					newExit(directions.SOUTH, 'Shell Beach', 'South to Shell Beach', 'STOWN_B', 5, 0, null)
-				],
-				function(args) {
-					var r = 'The southern edge of Smalltown.';
-					if (args !== null && args !== undefined)
-					{
-						switch (invDir(args.fromExit.direction))
-						{
-							case directions.NORTH:
-								r += ' Shell Beach is to the south.';
-								break;
-						}
-					}
-					return r;
-				}
-			),
-			newArea(
-				'STOWN_W', 'Smalltown West',
-				[],
-				[
-					newExit(directions.WEST, 'Old Farm rd', 'West to Old Farm road', 'OLDFARMRDE', 5, 0, null),
-					newExit(directions.EAST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
-				],
-				'The western edge of Smalltown'
-			),
-			newArea(
-				'STOWN_B', 'Shell Beach',
-				[],
-				[
-					newExit(directions.NORTH, 'Smalltown South', 'North to Smalltown South', 'STOWN_S', 5, 0, null),
-					newExit(directions.SOUTH, 'Pelican Pier', 'South to Pelican Pier', 'STOWN_D', 5, 0, null)
-				],
-				function(args) {
-					var r = 'Shell Beach.';
-					if (args !== null && args !== undefined)
-					{
-						switch (invDir(args.fromExit.direction))
-						{
-							case directions.NORTH:
-								r += ' Lots of sand, waves and pelicans.';
-								break;
-							case directions.SOUTH:
-								r += ' Smalltown South is to the north.';
-								break;
-						}
-					}
-					return r;
-				}
-			),
-			newArea(
-				'STOWN_D', 'Pelican Pier',
-				[],
-				[
-					newExit(directions.NORTH, 'Shell Beach', 'North to Shell Beach', 'STOWN_B', 5, 0, null)
-				],
-				'Pelican Pier, where most of Smalltown\'s fisherman spend their mornings.'
-			),
-			newArea(
-				'STOWN_JC', 'Smalltown Jr. College',
-				[],
-				[
-					newExit(directions.WEST, 'Smalltown North', 'West to Smalltown North', 'STOWN_N', 5, 0, null)
-				],
-				'Smalltown junior college, where Smalltown\'s youth get ready for the working force.'
-			),
-			newArea(
-				'STOWN_RES1', 'Cottage Rd',
-				[],
-				[
-					newExit(directions.EAST, 'Smalltown North', 'East to Smalltown North', 'STOWN_N', 5, 0, null)
-				],
-				'Cottage Road, several Smalltown residents live on this street.'
-			)
-		];
-		//"Fanciful Feldecarb Fountain flows full as fluttering fairies frolic fastidiously.  Flick a farthing?" 
-		function setupNewGameStructures_Standard()
-		{
-			//function newStructure(areaId, type, area, owner, value, locked, amenities, options)
-			newStructure('HOMESHACK', 'DWELL', 'HOMEPROP', null, 100, false,
-						[
-							newFeature('ITEM', 0, {canPickUp: true, canPurchase: false, itemStack: newItemStack('POT_OLD', 0, 1), onPickup: function(){ startQuest('COOKING_I'); }}),
-							newFeature('CAMPFIRE', 0),
-							newFeature('SLEEPINGBAG', 0)
-						],
-						{dwellingType: dwellingTypes.SHACK, noDelete: true,
-							firstEnter: 'It looks like a squatter was living here. They left an old ratty sleeping bag and the remnants of a campfire.' }
-			);
-			newStructure('GARDENSHOP', 'SHOP', 'STOWN_PL', null, 1000000, null,
-						[
-							newFeature('ITEM', 0, {itemStack: newItemStack(items.SPINACH_SEED, 0, 1), canPickUp: false, canPurchase: true, conditions: function() {return (calendarState.season === seasons.SPRING);} })
-						],
-						{displayName: 'Avery\'s H&G',
-							description: 'Avery\'s Home & Garden stocks seasonal seeds and general garden goods.' }
-			);
-			newStructure('DOMSBAKERY', 'SHOP', 'STOWN_PL', 'dominic', 1000000, null,
-						[],
-						{displayName: 'BPS Bakery',
-							description: 'The Bread Poet\'s Society, bakery and coffee shop. Open mic on thursday nights.' }
-			);
-			newStructure('CLAYSDELI', 'SHOP', 'STOWN_PL', 'clayton', 1000000, null,
-						[],
-						{displayName: 'M&G Deli',
-							description: 'Meat and Greet delicatessen. Get your meats and other foods here.' }
-			).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
-			newStructure('GORDOSREST', 'SHOP', 'STOWN_E', 'luigi', 1000000, null,
-						[],
-						{displayName: 'D\'Graisse\'s',
-							description: 'Smalltowns own fine dining establishment. Very good reviews online.' }
-			);
-			newStructure('EMMASSHOP', 'SHOP', 'EMMARANCH', null, 2000000, null,
-						[],
-						{displayName: 'Emma\'s Feed',
-							description: 'Emma\'s Feed carries livestock, feed and ranching goods.' }
-			).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
-			newStructure('EMMAS_HOUSE', 'DWELL', 'EMMARANCH', null, 1000000, true,
-						[],
-						{dwellingType: dwellingTypes.HOUSE, noDelete: false, description: 'Emma\'s house.' }
-			);
-			newStructure('EMMARANCH_STAFF', 'DWELL', 'EMMARANCH', null, 10000, true,
-						[],
-						{dwellingType: dwellingTypes.BUNG, noDelete: false, description: 'On-site living for ranch hands.' }
-			);
-			newStructure('MARTIN_HOUSE', 'DWELL', 'STOWN_RES1', null, 250000, true,
-						[],
-						{dwellingType: dwellingTypes.COTTAGE, noDelete: false, description: 'The Martin Residence.' }
-			);
-		}
+	<script> // npc calls
+		avery();
+		clayton();
+		dominic();
+		emma();
+		liam();
+		luigi();
+		mateo();
+		olivia();
 	</script>
-	<script> // character functions
-		function addStamina(n)
-		{
-			characterState.stamina = clamp(characterState.stamina + n, 0, characterState.maxStamina);
-			updateDisplay();
-			if (characterState.stamina == 0)
-			{
-				addNarrationMessage('You are out of stamina, you should head to bed.');
-			}
-		}
-		function addMoney(n)
-		{
-			characterState.money = clamp(characterState.money + n, 0, 999999999);
-			updateDisplay();
-			if (characterState.money == 0)
-			{
-				addNarrationMessage('You are out of money.');
-			}
-		}
-		function addBoon()
-		{
-			characterState.boon++;
-		}
-		var DEFAULT_STAMINA_MESSAGE = 'You don\'t have the energy for this.';
-		function testStamina(cost, message, update)
-		{
-			if (characterState.stamina >= cost)
-			{
-				if (update) { addStamina(-cost); } 
-				return true;
-			}
-			if (message !== null)
-			{
-				addNarrationMessage(message);
-			}
-			return false;
-		}
-		function testTime(cost, passout, update)
-		{
-			if (calendarState.minutes + cost < getPassOutTime())
-			{
-				if (update) { addTime(cost); }
-				return true;
-			}
-			if (passout)
-			{
-				passOut();
-			}
-			return false;
-		}
-		var DEFAULT_MONEY_MESSAGE = 'You don\'t have the money.';
-		function testMoney(cost, message, update)
-		{
-			if (characterState.money >= cost)
-			{
-				if (update) { addMoney(-cost); } 
-				return true;
-			}
-			if (message !== null)
-			{
-				addNarrationMessage(message);
-			}
-			return false;
-		}
-		var DEFAULT_ADD_INVENTORY_MESSAGE = 'You can\'t hold any more of this item.';
-		function tryAddInventory(item, level, quantity, message)
-		{
-			var it = item;
-			if (typeof(it) !== 'object')
-			{
-				it = items[it];
-			}
-			var stack = getInventoryItem(item, level);
-			if (stack.quantity + quantity <= it.maxStack)
-			{
-				addItemToInventory(item, level, quantity);
-				return true;
-			}
-			if (message)
-			{
-				addAlertNarration(DEFAULT_ADD_INVENTORY_MESSAGE);
-			}
-			return false;
-		}
-		function tryAddItemWithMessage(item, level, quantity)
-		{
-			var success = tryAddInventory(item, level, quantity, true);
-			if (success)
-			{
-				var i = items[item];
-				addAlertNarration(ucaseName(getFuncOrVar(i.displayName)) + ' ' + ((quantity > 1) ? 'x' + quantity : '') + 'added to your inventory.');
-				checkQuestTriggers(characterState, questTriggers.GAININVENTORYITEM);
-			}
-			return success;
-		}
-		function tryRemoveInventory(item, level, quantity, message)
-		{
-			var item = getInventoryItem(item, level);
-			var name = items[item.item].displayName;
-			if (item.quantity < quantity)
-			{
-				if (message) { addAlertNarration('Tried to remove ' + ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' from your inventory, but couldn\'t.'); }
-				return false;
-			}
-			else
-			{
-				if (message) { addAlertNarration(ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' removed from your inventory.'); }
-				item.quantity -= quantity;
-			}
-			var i = getInventoryItemIndex(item, level);
-			characterState[i] = item;
-			return true;
-		}
-		function countInventoryItem(item, level = 0)
-		{
-			var r = 0;
-			var it = getItem(item);
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				if (characterState.inventory[i].item === it.id && characterState.inventory[i].level >= level)
-				{
-					r += characterState.inventory[i].quantity;
-				}
-			}
-			return r;
-		}
-		function getInventoryItemIndex(item, level = 0)
-		{
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				var csi = characterState.inventory[i];
-				if (csi.item === item && csi.level == level && csi.quantity > 0)
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-		function getInventoryItem(item, level = 0)
-		{
-			var it = item;
-			if (typeof(it) === 'object')
-			{
-				it = items[it].item;
-			}
-			var i = getInventoryItemIndex(it, level);
-			if (i < 0) { return newItemStack(it, 0, 0); }
-			return characterState.inventory[i];
-		}
-		function getAllInvetoryItemsAtLevel(item, level = 0)
-		{
-			var r = [];
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				var csi = characterState.inventory[i];
-				if (csi.item === item && csi.level >= level && csi.quantity > 0)
-				{
-					r.push(characterState.inventory[i]);
-				}
-			}
-			return r;
-		}
-		function addItemToInventory(item, level, quantity)
-		{
-			var q = quantity;
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				if (characterState.inventory[i].item === item && characterState.inventory[i].level == level)
-				{
-					characterState.inventory[i].quantity += quantity;
-					q = characterState.inventory[i].quantity;
-				}
-			}
-			characterState.inventory.push(newItemStack(item, level, quantity));
-			
-			return q;
-		}
-		function updateInventoryTable()
-		{
-			var x = g('inventoryTableBody');
-			x.innerHTML = '';
-			
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				var stack = characterState.inventory[i];
-				var item = items[stack.item];
-				if (stack.quantity > 0)
-				{
-					var row = ce('tr');
-					var nameTd = ce('td');
-					var actionTd = ce('td');
-					
-					if (stack.quantity > 1)
-					{
-						nameTd.innerHTML = ucaseName(item.pluralName) + ' x' + stack.quantity;
-					}
-					else
-					{
-						nameTd.innerHTML = ucaseName(item.displayName);
-					}
-					if (stack.level > 0)
-					{
-						nameTd.appendChild(renderStars(stack.level, true));
-					}	
-
-					actionTd.appendChild(makeItemInspectbutton(item));
-
-					row.appendChild(nameTd);
-					row.appendChild(actionTd);
-					x.appendChild(row);
-				}
-			}
-		}
-		function makeItemInspectbutton(item)
-		{
-			return makeButton('ochreButton', function(){inspectItem(this);}, INSPECT_ICON, 'Inspect ' + item.displayName, {itemid: item.id});
-		}
-		function inspectItem(itemButton)
-		{
-			if (items.hasOwnProperty(itemButton.getAttribute('data-itemid')) && items[itemButton.getAttribute('data-itemid')].hasOwnProperty('description'))
-			{
-				var item = items[itemButton.getAttribute('data-itemid')];
-				addAlertNarration(item.description);
-			}
-			else
-			{
-				addAlertNarration('No description available.');
-			}
-		}
-		function characterKnowsRecipe(character, recipe)
-		{
-			var rec = getRecipe(recipe);
-			for (var i=0;i<character.knownRecipes.length;i++)
-			{
-				if (character.knownRecipes[i] == rec.id) { return true; }
-			}
-			return false;
-		}
-		function characterHasCookedRecipe(character, recipe)
-		{
-			var rec = getRecipe(recipe);
-			for (var key in character.cookedRecipes)
-			{
-				if (key == rec.id) { return character.cookedRecipes[key]; }
-			}
-			return 0;
-		}
-		function learnRecipe(character, recipe, message)
-		{
-			if (!characterKnowsRecipe(character, recipe))
-			{
-				var rec = getRecipe(recipe);
-				character.knownRecipes.push(rec.id);
-				if (message)
-				{
-					addAlertNarration('You\'ve learned a recipe for: ' + rec.displayName + '.');
-				}
-				checkQuestTriggers(character, questTriggers.LEARNRECIPE);
-			}
-		}
-		function hasIngredientsForRecipe(recipe)
-		{
-			for (var i=0;i<recipe.ingredients.length;i++)
-			{
-				if (getInventoryItem(recipe.ingredients[i].item, null).quantity < 1) { return false; }
-			}
-			return true;
-		}
-		
-		function tryPurchaseItem(button)
-		{
-			var feat = features[parseInt(button.getAttribute('data-feature'))];
-			var quantity = parseInt(button.getAttribute('data-purchaseQuantity'));
-			var price = feat.itemStack.item.value * quantity;
-			if (testMoney(price, DEFAULT_MONEY_MESSAGE, true))
-			{
-				tryAddInventory(feat.itemStack.item, feat.itemStack.level, quantity, true);
-			}
-		}
-		function getItem(item)
-		{
-			var itemId = item;
-			if (typeof(item) === 'object')
-			{
-				if (item.hasOwnProperty('maxStack')) { return item; }
-				if ('tagName' in item)
-				{
-					itemId = item.getAttribute('data-itemid');
-				}
-			}
-			for (var key in items)
-			{
-				if (key == itemId) { return items[key]; }
-			}
-			return null;
-		}
-		function clickTakeItemButton(itemButton)
-		{
-			tryPickupItem(itemButton.getAttribute('data-itemid'),
-				itemButton.getAttribute('data-itemlevel'),
-				itemButton.getAttribute('data-itemquantity'),
-				itemButton.getAttribute('data-area'),
-				itemButton.getAttribute('data-feature'));
-		}
-		function tryPickupItem(item, level, quantity, areaId, featureId)
-		{
-			if (tryAddItemWithMessage(item, level, quantity))
-			{
-				var feat = getFeature(featureId);
-				if (feat.hasOwnProperty('onPickup'))
-				{
-					feat.onPickup();
-				}
-				deleteFeature(areaId, featureId);
-				updateDisplay();
-			}
-		}
+	<script> // quests
+		// newQuest(id, name, description, rewards, triggers, conditions, onComplete)
+		newQuest('COOKING_I', 'Commence Cooking I',
+				'Collect a breadknife, a cleaver and a chef\'s knife to make a set.',
+				'Beginner Knife Set',
+				[questTriggers.GAININVENTORYITEM],
+				[function(cs) {
+						return (getInventoryItem('BREADKNIFE').quantity > 0
+							&& getInventoryItem('CLEAVER').quantity > 0
+							&& getInventoryItem('CHEFSKNIFE').quantity > 0);
+					}],
+				function(cs) {
+						tryRemoveInventory('BREADKNIFE', 0, 1, true);
+						tryRemoveInventory('CLEAVER', 0, 1, true);
+						tryRemoveInventory('CHEFSKNIFE', 0, 1, true);
+						tryRemoveInventory('POT_OLD', 0, 1, true);
+						upgradeTool(cs, 'cookingSet', 1);
+						addAlertNarration('Cooking Set added to tools.')
+						addAlertNarration('You completed the Cooking Set. Now that you\'ve got it, maybe some of the locals will share some of their recipes.');
+						startQuest('COOKING_II');
+					});
+		newQuest('COOKING_II', 'Commence Cooking II',
+				'Talk to the local foodies and learn a few techniques.',
+				'Level 1 Cooking Skill',
+				[questTriggers.LEARNRECIPE],
+				[function(cs) {
+						return (characterKnowsRecipe(cs, 'KABOB_STEAK')
+							&& characterKnowsRecipe(cs, 'DOUGH_BASIC'));
+					}],
+				function(cs) {
+						addAlertNarration('You\'ve got the tools and a couple basic recipes, now you can begin your cooking career.')
+						upgradeSkill(cs, 'cooking', 1, true);
+						startQuest('COOKING_III');
+					});
+		newQuest('COOKING_III', 'Commence Cooking III',
+				'Make a basic dough and cook a steak kabob.',
+				'New Recipes',
+				[questTriggers.COOKRECIPE],
+				[function(cs) {
+						return (characterHasCookedRecipe(cs, 'KABOB_STEAK') > 0
+							&& characterHasCookedRecipe(cs, 'DOUGH_BASIC') > 0);
+					}],
+				function(cs) {
+						addAlertNarration('By tinkering around with your cooking techniques, you\'ve unlocked a few recipes. Now you\'re on your own to learn the ways of the chef.')
+						learnRecipe(cs, 'BREAD_CAMPFIRE', true);
+						learnRecipe(cs, 'BURGER_RUSTIC', true);
+						learnRecipe(cs, 'MARSHMALLOW_ROASTED', true);
+					});
 	</script>
-	<script> // quest functions
-		function setupQuests_Standard()
+	<script> // gameplay functions
+		function createNewCharacter()
 		{
-			// newQuest(id, name, description, rewards, triggers, conditions, onComplete)
-			newQuest('COOKING_I', 'Commence Cooking I',
-					'Collect a breadknife, a cleaver and a chef\'s knife to make a set.',
-					'Beginner Knife Set',
-					[questTriggers.GAININVENTORYITEM],
-					[function(cs) {
-							return (getInventoryItem('BREADKNIFE').quantity > 0
-								&& getInventoryItem('CLEAVER').quantity > 0
-								&& getInventoryItem('CHEFSKNIFE').quantity > 0);
-						}],
-					function(cs) {
-							tryRemoveInventory('BREADKNIFE', 0, 1, true);
-							tryRemoveInventory('CLEAVER', 0, 1, true);
-							tryRemoveInventory('CHEFSKNIFE', 0, 1, true);
-							tryRemoveInventory('POT_OLD', 0, 1, true);
-							upgradeTool(cs, 'cookingSet', 1);
-							addAlertNarration('Cooking Set added to tools.')
-							addAlertNarration('You completed the Cooking Set. Now that you\'ve got it, maybe some of the locals will share some of their recipes.');
-							startQuest('COOKING_II');
-						});
-			newQuest('COOKING_II', 'Commence Cooking II',
-					'Talk to the local foodies and learn a few techniques.',
-					'Level 1 Cooking Skill',
-					[questTriggers.LEARNRECIPE],
-					[function(cs) {
-							return (characterKnowsRecipe(cs, 'KABOB_STEAK')
-								&& characterKnowsRecipe(cs, 'DOUGH_BASIC'));
-						}],
-					function(cs) {
-							addAlertNarration('You\'ve got the tools and a couple basic recipes, now you can begin your cooking career.')
-							upgradeSkill(cs, 'cooking', 1, true);
-							startQuest('COOKING_III');
-						});
-			newQuest('COOKING_III', 'Commence Cooking III',
-					'Make a basic dough and cook a steak kabob.',
-					'New Recipes',
-					[questTriggers.COOKRECIPE],
-					[function(cs) {
-							return (characterHasCookedRecipe(cs, 'KABOB_STEAK') > 0
-								&& characterHasCookedRecipe(cs, 'DOUGH_BASIC') > 0);
-						}],
-					function(cs) {
-							addAlertNarration('By tinkering around with your cooking techniques, you\'ve unlocked a few recipes. Now you\'re on your own to learn the ways of the chef.')
-							learnRecipe(cs, 'BREAD_CAMPFIRE', true);
-							learnRecipe(cs, 'BURGER_RUSTIC', true);
-							learnRecipe(cs, 'MARSHMALLOW_ROASTED', true);
-						});
-		}
-
-		function populateJournalTab()
-		{
-			var xAct = g('activeQuestsTableBody');
-			var xCom = g('completedQuestsTableBody');
-			xAct.innerHTML = '';
-			xCom.innerHTML = '';
-			var hasActive = false;
-			var hasCompleted = false;
-			for (var i=0;i<characterState.quests.length;i++)
-			{
-				if (characterState.quests[i].status != questStatuses.NOTSTARTED)
-				{
-					var row = ce('tr');
-					var nameTd = ce('td');
-					var actionTd = ce('td');
-					nameTd.innerHTML = characterState.quests[i].name;
-					var status = characterState.quests[i].status;
-					if (status == questStatuses.AWARDED)
-					{
-						actionTd.appendChild(makeButton('greenButton', function(){collectQuestRewards(this);}, 'Reward', 'Collect Rewards for ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
-					}
-					actionTd.appendChild(makeButton('ochreButton', function(){inspectQuest(this);}, INSPECT_ICON, 'Inspect ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
-					row.appendChild(nameTd);
-					row.appendChild(actionTd);
-					if (status == questStatuses.ACTIVE || status == questStatuses.AWARDED)
-					{
-						xAct.appendChild(row);
-						hasActive = true;
-					}
-					if (status == questStatuses.COMPLETED)
-					{
-						xCom.appendChild(row);
-						hasCompleted = true;
-					}
-				}
-			}
-			if (hasActive)
-			{
-				g('activeQuestsBox').style.display = 'block';
-				g('noActiveQuestsBox').style.display = 'none';
-			}
-			else
-			{
-				g('activeQuestsBox').style.display = 'none';
-				g('noActiveQuestsBox').style.display = 'block';
-			}
-			if (hasCompleted)
-			{
-				g('completedQuestsBox').style.display = 'block';
-				g('noCompletedQuestsBox').style.display = 'none';
-			}
-			else
-			{
-				g('completedQuestsBox').style.display = 'none';
-				g('noCompletedQuestsBox').style.display = 'block';
-			}
-		}
-		
-		function getQuest(quest)
-		{
-			var questId = quest;
-			if (typeof(quest) === 'object')
-			{
-				if (quest.hasOwnProperty('onComplete')) { return quest; }
-				if ('tagName' in quest)
-				{
-					questId = quest.getAttribute('data-questid');
-				}
-			}
-
-			for (var i=0;i<quests.length;i++)
-			{
-				if (quests[i].id == questId)
-				{
-					return quests[i];
-				}
-			}
-			return null;
-		}
-		function startQuest(questId, message = true)
-		{
-			var q = getQuest(questId);
-			if (q !== null)
-			{
-				if (getCharacterQuestStatus(questId) == questStatuses.NOTSTARTED)
-				{
-					characterState.quests.push(q);
-					q.status = questStatuses.ACTIVE;
-					if (message)
-					{
-						addAlertNarration('Quest added to your journal: ' + q.name);
-					}
-				}
-			}
-			else
-			{
-				if (message) { addAlertNarration('There was a problem starting this quest.'); }
-			}
-		}
-		function getCharacterQuestStatus(quest)
-		{
-			var questId = getQuest(quest).id;
-			if (questId !== null)
-			{
-				for (var i=0;i<characterState.quests.length;i++)
-				{
-					if (characterState.quests[i].id == questId)
-					{
-						return characterState.quests[i].status;
-					}
-				}
-			}
-			return questStatuses.NOTSTARTED;
-		}
-		
-		function isCharacterOnQuest(quest)
-		{
-			return (getCharacterQuestStatus(quest) == questStatuses.ACTIVE);
-		}
-		function hasCharacterFinishedQuest(quest)
-		{
-			return (getCharacterQuestStatus(quest) == questStatuses.COMPLETED);
-		}
-		
-		function checkQuestTriggers(character, trigger)
-		{
-			for (var i=0;i<character.quests.length;i++)
-			{
-				var q = character.quests[i];
-				if (q.status == questStatuses.ACTIVE)
-				{
-					if (q.triggers.includes(trigger))
-					{
-						if (testConditions(character, q.conditions))
-						{
-							addAlertNarration('You completed the quest: <i>"' + q.name + '"</i>. Check your journal tab to collect rewards.');
-							q.status = questStatuses.AWARDED;
-							updateDisplay();
-						}
-					}
-				}
-			}
-		}
-		function collectQuestRewards(quest)
-		{
-			var q = getQuest(quest);
-			if (q !== null)
-			{
-				if (getCharacterQuestStatus(q) == questStatuses.AWARDED)
-				{
-					q.onComplete(characterState);
-					q.status = questStatuses.COMPLETED;
-					updateDisplay();
-				}
-			}
-		}
-	</script>
-	<script> // npc functions
-		function getNpcByName(name)
-		{
-			for (var i=0;i<npcs.length;i++)
-			{
-				if (npcs[i].firstName.toLowerCase().substring(0, name.length) == name.toLowerCase())
-				{
-					return npcs[i];
-				}
-			}
-			return null;
-		}
-		function getPresentNpcs(area)
-		{
-			var n = [];
-			var a = getArea(area);
-			for (var i=0;i<npcs.length;i++)
-			{
-				var scheds = getNpcSchedulesForArea(npcs[i], area);
-				for (var s=0;s<scheds.length;s++)
-				{
-					if (testConditions(characterState, scheds[s].conditions))
-					{
-						npcs[i].currentActivity = scheds[s].activity;
-						n.push(npcs[i]);
-					}
-				}
-			}
-			return n;
-		}
-		function getNpcSchedulesForArea(npc, area)
-		{
-			var a = getArea((area == null || area == undefined) ? characterState.currentArea : area);
-			var r = [];
-			if (npc.hasOwnProperty('schedule') && npc.schedule !== null && npc.schedule !== undefined)
-			{
-				for (var i=0;i<npc.schedule.length;i++)
-				{
-					if (npc.schedule[i].area == a.id)
-					{
-						r.push(npc.schedule[i]);
-					}
-				}
-			}
-			return r;
-		}
-		function getNpcAttraction(npc, app)
-		{
-			var r = 0;
-			var n = npcs[npc];
-			r += (n.personalPreferences.includes(app.bodyType)) ? 1 : 0;
-			r += (n.personalPreferences.includes(app.aesthetic)) ? 1 : 0;
-			r += (n.personalPreferences.includes(app.eyes)) ? 1 : 0;
-			r += (n.personalPreferences.includes(app.currentHairColor)) ? 1 : 0;
-			r += (n.personalPreferences.includes(app.hairStyle)) ? 1 : 0;
-			r += (n.personalPreferences.includes(app.height)) ? 1 : 0;
-			r += (n.personalPreferences.includes(attractors.DYED_HAIR) && app.currentHair != app.naturalHairColor) ? 1 : 0;
-			
-			return r;
-		}
-		function whereIsNpc(name)
-		{
-			var n = getNpcByName(name);
-			if (n !== null)
-			{
-				for (var s=0;s<n.schedule.length;s++)
-				{
-					for (var c=0;c<n.schedule[s].conditions.length;c++)
-					{
-						if (testConditions(chracterState, n.schedule[s].conditions[c])) { return n.schedule[s].area; }
-					}
-				}
-			}
-			return null;
-		}
-		function talkToNpc(npc)
-		{
-			var n = npc;
-			if ('tagName' in npc)
-			{
-				n = npcs[npc.getAttribute('data-npcid')];
-			}
-			if (n !== null && n !== undefined)
-			{
-				var npcd = getNpcDialog(n);
-				if (npcd !== null)
-				{
-					addTime(5);
-					addNpcDialogNarration(n, npcd.text);
-					if (npcd.after !== null && npcd.after !== undefined)
-					{
-						npcd.after();
-					}
-				}
-				else
-				{
-					addAlertNarration(n.firstName + ' ' + getRandomArrayValue([
-							'doesn\'t seem to want to talk at the moment.',
-							'doesn\'t have anything to say right now.',
-							'seems to be lost in thought.'
-						]));
-				}
-				n.conversationsToDate++;
-				n.conversationsToday++;
-			}
-		}
-		function getNpcDialog(n)
-		{
-			for (var d=0;d<n.dialog.length;d++)
-			{
-				for (var c=0;c<n.dialog[d].conditions.length;c++)
-				{
-					if (testConditions(characterState, n.dialog[d].conditions[c]))
-					{
-						return n.dialog[d];
-					}
-				}
-			}
-			return null;
-		}
-	</script>
-	<script> // action button functions
-		function clickActionButton(button, action)
-		{
-			action(button);
-			updateDisplay();
-		}
-		function inspect(obj)
-		{
-			if (obj.hasOwnProperty('description'))
-			{
-				addAlertNarration(getFuncOrVar(obj.description, obj));
-			}
-			else
-			{
-				addAlertNarration('No description available.');
-			}
-		}
-		function inspectQuest(quest)
-		{
-			var q = quest;
-			if ('tagName' in quest)
-			{
-				q = getQuest(quest.getAttribute('data-questid'));
-			}
-			addSignTextNarration(['<b>Quest: ' + q.name + '</b>' + '%LINE_HOR%', '<b>Objectives:</b> ' + q.description + '%LINE_HOR%', '<b>Rewards</b>: ' + q.rewards]);
-		}
-		function inspectStructure(struct)
-		{
-			var s = struct;
-			if ('tagName' in struct)
-			{
-				s = structures[struct.getAttribute('data-structureid')];
-			}
-			if (s.type == 'DWELL' && s.type.hasOwnProperty('description'))
-			{
-				inspect(s.dwellingType);
-			}
-			else
-			{
-				inspect(s);
-			}
-		}
-		function inspectNpc(npc)
-		{
-			var n = npc;
-			if ('tagName' in npc)
-			{
-				n = npcs[npc.getAttribute('data-npcid')];
-			}
-			var t = [];
-			t.push(n.firstName + ' ' + n.lastName + renderHearts(n.characterRelationship.level).outerHTML + '%LINE_HOR%' + '<i>' + n.description + '</i><br />');
-			var app = n.appearance;
-			t.push(n.age + ' year old ' + sexes[n.sex]);
-			t.push('<b>Height:</b> ' + app.height.displayName);
-			t.push('<b>Body Type:</b> ' + app.bodyType.displayName);
-			t.push('<b>Hair:</b> ' + app.currentHairColor.displayName + ' ' + app.hairStyle.displayName);
-			t.push('<b>Eyes:</b> ' + app.eyes.displayName);
-			t.push('<b>Aesthetic:</b> ' + app.aesthetic.displayName);
-			addSignTextNarration(t);
-		}
-		function inspectFeature(featureButton)
-		{
-			var f = getFeature(featureButton.getAttribute('data-featureid'));
-			if (f.type == 'SIGN' && f.hasOwnProperty('text'))
-			{
-				addAlertNarration('This sign reads:');
-				var t = '';
-				if (Array.isArray(f.text))
-				{
-					var ts = [];
-					for (var i=0;i<f.text.length;i++)
-					{
-						ts.push(getFuncOrVar(f.text[i]));
-					}
-					t = ts.join('<br />');
-				}
-				else
-				{
-					t = getFuncOrVar(f.text);
-				}
-				addSignTextNarration(t);
-			}
-			else if (f.type == 'ITEM' && f.hasOwnProperty('itemStack'))
-			{
-				inspect(f.itemStack.item);
-			}
-			else
-			{
-				inspect(f);
-			}
-		}
-		function clickClearDebrisButton(button)
-		{
-			var f = getFeature(button.getAttribute('data-feature'));
-			tryClearDebris(f.level, 30*Math.pow(2, f.level-1), button.getAttribute('data-area'), button.getAttribute('data-feature'));
-		}
-		function clickNavButton(button)
-		{	
-			tryTravel(getArea(button.getAttribute('data-area')).exits[button.getAttribute('data-exit')]);
-		}
-		function clickFishButton(button)
-		{
-			tryFishingInWater(button.getAttribute('data-area'), button.getAttribute('data-feature'));
-		}
-		function clickForageButton(button)
-		{
-			var id = parseInt(button.getAttribute('data-feature'));
-			var feat = getFeature(id);
-			var q = rint(feat.maxQuantity - feat.minQuantity + 1) + feat.minQuantity;
-			if (!worldState.foragedThisWeek.includes(id) && testConditions(characterState, feat.conditions))
-			{
-				if (tryAddInventory(feat.item, feat.level, getForagedItemQuantity(q), true))
-				{
-					if (getSkillLevel(characterState, 'foraging') > 0 && roll(getForagedBonusChance()))
-					{
-						if (tryAddInventory(feat.item, feat.level + 1, getForagedBonusQuantity(), false))
-						{
-							q += getForagedBonusQuantity();
-						}
-					}
-					worldState.foragedThisWeek.push(id);
-					updateDisplay();
-					addAlertNarration('Added ' + q + ' ' + getPluralizedItemName(feat.item, q) + ' to your inventory.');
-				}
-			}
-		}
-	</script>
-	<script> // game setup functions
-		function startNewGame()
-		{
-			setSubcontent('gameBox', 'startNewGame');
+			setSubcontent('gameBox', 'createNewCharacter');
 			clearNarrationBox();
 			addNarrationMessage('Welcome to Smalltown.');
 			addNarrationMessage('You\'ve inherrited a large property from your recently deceased relative and decided to uproot your whole life to live here.');
@@ -3092,478 +1235,64 @@
 		{
 			setSubcontent('gameBox', 'continueGame');
 		}
-		function updateCharacterName(name)
+		function loadNewWorld()
 		{
-			characterState.name = name;
-		}
-		function setSubcontent(container, content)
-		{
-			var con = g(container);
-			con.setAttribute('data-prevSubcontent', con.getAttribute('data-subcontent'));
-			con.setAttribute('data-subcontent', content);
-			var subcons = con.getElementsByClassName(con.getAttribute('data-subcontent-type'));
-			for (var i=0;i<subcons.length;i++)
-			{
-				subcons[i].style.display = 'none';
-			}
-			var currentContent = g(con.getAttribute('data-subcontent-type') + '-' + content);
-			currentContent.style.display = con.getAttribute('data-subcontent-default');
-			fixButtonTextWidths(currentContent);
-		}
-		function getSubcontent(container)
-		{
-			return g(container).getAttribute('data-subcontent');
-		}
-		function selectTab(container, content, tabClass, selectedTab)
-		{
-			setSubcontent(container, content);
-			var tabs = document.getElementsByClassName(tabClass);
-			for (var i=0;i<tabs.length;i++)
-			{
-				tabs[i].setAttribute('data-selected', 'false');
-			}
-			selectedTab.setAttribute('data-selected', 'true');
-			selectedTabs[container] = content;
-			updateDisplay();
-		}
-	</script>
-	<script> // property functions
-		function updatePropertyName(index, prop)
-		{
-			if (characterState.ownedAreas.includes(index))
-			{
-				getArea(index).name = prop;
-			}
-		}
-	</script>
-	<script> // game save functions
-		function getGameSaves()
-		{
-			return null;
-		}
-		function loadGame(game)
-		{
-			if (game === null)
-			{
-				var name = g('yourNameInput').value;
-				var prop = g('propNameInput').value;
-				if (name != '' && prop != '')
-				{
-					clearNarrationBox();
-					newGame(name, prop);
-				}
-			}
-		}
-		function newGame(name, prop)
-		{
-			areas = [...newGameAreas_Standard];
-			setupNewGameStructures_Standard();
-			setupQuests_Standard();
-			characterState = newCharacterState_Standard();
-			calendarState = newCalendarState_Standard();
-			setGamePreferences(newGamePreferences_Standard());
-			newGameNpcs_Standard();
-			worldState = newWorldState();
-			updateCharacterName(name);
+			var name = g('yourNameInput').value;
+			var prop = g('propNameInput').value;
+
+			newGame(name);
 			updatePropertyName('HOMEPROP', prop);
 			characterState.appearance = newCharacterAppearance(
-				heights[g('heightInput').value],
-				bodyTypes[g('bodyTypeInput').value],
-				hairColors[g('hairInput').value],
-				hairColors[g('hairInput').value],
-				hairStyles[g('hairStyleInput').value],
-				eyeColors[g('eyeInput').value],
-				aesthetics[g('aestheticInput').value]
+				modData.types.heights[g('heightInput').value],
+				modData.types.bodies[g('bodyTypeInput').value],
+				modData.types.hairColors[g('hairInput').value],
+				modData.types.hairColors[g('hairInput').value],
+				modData.types.hairStyles[g('hairStyleInput').value],
+				modData.types.eyeColors[g('eyeInput').value],
+				modData.types.aesthetics[g('aestheticInput').value]
 			);
+			
+			characterState.health = 20;
+			characterState.maxHealth = 20;
+			characterState.stamina = 20;
+			characterState.maxStamina = 20;
+			characterState.money = 0;
+			characterState.lastBedtime = 1440; // midnight
+			characterState.ownedAreas.push('HOMEPROP');
+			characterState.homeProperty = 'HOMEPROP';
+			
 			if (g('sexInputMale').checked) { characterState.sex = 1; }
 			else { characterState.sex = 0; }
+			
+			startGame();
 			setSubcontent('gameBox', 'main');
 			setSubcontent('viewBox', 'currentArea');
-			setCurrentArea('HOMEPROP', null);
+			setCurrentArea(characterState.homeProperty, null);
 			selectTab('tabBox', 'area', 'maintabs', g('mainTab_Area'));
-			gameHasStarted = true;
 		}
-		function setGamePreferences(pref)
+		
+		function tryClearDebris(stamina, time, area, feature)
 		{
-			gamePreferences = pref;
-			g('pref_areaTabOnTravel_yes').checked = pref.areaTabOnTravel;
-			g('pref_areaTabOnTravel_no').checked = !pref.areaTabOnTravel;
-		}
-		function passOut()
-		{
-			clearNarrationBox();
-			addNarrationMessage('You passed out from exhaustion.');
-			addNarrationMessage('Thankfully a kind citizen found you and took you home.');
-			if (rint(50))
+			if (testStamina(stamina, DEFAULT_STAMINA_MESSAGE, false))
 			{
-				characterState.money = Math.max(0, Math.round(characterState.money / 2));
-				addNarrationMessage('But not before someone went through your pockets and robbed you.');
-			}
-		}
-	</script>
-	<script> // misc functions
-		function clearNarrationBox()
-		{
-			var nar = g('narrationBox');
-			nar.innerHTML = '';
-		}
-		function appendNarrationBox(message, className)
-		{
-			var nar = g('narrationBox');
-			var p = ce('p');
-			if (Array.isArray(message))
-			{
-				var t = [];
-				for (var i=0;i<message.length;i++)
+				if (testTime(time, true, true))
 				{
-					t.push(handleWildcards(message[i]))
-				}
-				p.innerHTML = t.join('<br />');
-			}
-			else { p.innerHTML = handleWildcards(message); }
-			p.className = className;
-			nar.appendChild(p);
-		}
-		function addNarrationMessage(message)
-		{
-			appendNarrationBox(message, 'narrationMessage');
-		}
-		function scrollNarrationToBottom()
-		{
-			var nar = g('narrationBox');
-			nar.scrollTop = nar.scrollHeight;
-		}
-		function addAlertNarration(message)
-		{
-			addNarrationMessage(message);
-			scrollNarrationToBottom();
-		}
-		function addSignTextNarration(message)
-		{
-			appendNarrationBox(message, 'signTextNarrationMessage');
-			scrollNarrationToBottom();
-		}
-		function addNpcDialogNarration(npc, message)
-		{
-			var n = npc;
-			if (typeof(n) !== 'object')
-			{
-				n = getNpcByName(npc);
-			}
-			var text = ['<b>' + n.firstName + ' says:</b>'];
-			if (Array.isArray(message))
-			{
-				text.push(...message);
-			}
-			else
-			{
-				text.push(message);
-			}
-			addSignTextNarration(text);
-		}
-		function handleWildcards(text)
-		{
-			var r = text;
-			if (gameHasStarted)
-			{
-				r = swapWildCard_Property(getArea('HOMEPROP'), r, '%HOMEPROPMAME%', getArea('HOMEPROP').name);
-				r = swapWildCard_Property(characterState.skills, r, '%EARLYBIRDMIN%', getEarlyBirdMinutes());
-				r = swapWildCard_Property(characterState.skills, r, '%NIGHTOWLMIN%', getNightOwlMinutes());
-			}
-			r = r.replace('%LINE_HOR%', '<hr />');
-			return r;
-		}
-		function swapWildCard_Property(testProp, text, wildcard, value)
-		{
-			return swapWildCard_Condition((testProp !== null && testProp != undefined), text, wildcard, value);
-		}
-		function swapWildCard_Condition(condition, text, wildcard, value)
-		{
-			if (condition) { return text.replace(wildcard, value); }
-			return text;
-		}
-		function makeButton(className, action, buttonText, accessibleText, attr)
-		{
-			var b = ce('button');
-			b.className = className;
-			b.onclick = action;
-			if (accessibleText !== null)
-			{
-				b.setAttribute('aria-label', handleWildcards(accessibleText));
-				b.setAttribute('title', handleWildcards(accessibleText));
-			}
-			b.innerHTML = handleWildcards(buttonText);
-			
-			if (attr != null)
-			{
-				for (var key in attr)
-				{
-					b.setAttribute('data-' + key, attr[key]);
-				}
-			}
-			return b;
-		}
-		function testConditions(character, conditions)
-		{
-			if (conditions === null || conditions === undefined)
-			{
-				return true;
-			}
-			if (Array.isArray(conditions))
-			{
-				for (var i=0;i<conditions.length;i++)
-				{
-					if (conditions[i](character) == true) { return true; }
-				}
-			}
-			if (typeof(conditions) === 'function')
-			{
-				return conditions(character);
-			}
-			return false;
-		}
-	</script>
-	<script> // display functions
-		function updateDisplay()
-		{
-			updateCalendar();
-			updateStamina();
-			updateMoney();
-			updateNavigationButtons();
-			populateTabBox();
-		}
-		function updateCalendar()
-		{
-			if (calendarState != null)
-			{
-				g('currentDayOfWeek').innerHTML = getDayOfWeek().displayName;
-				g('currentSeason').innerHTML = calendarState.season.displayName;
-				g('currentSeasonDay').innerHTML = ord(calendarState.dayOfSeason + 1);
-				updateClock();
-			}
-		}
-		function getDayOfWeek(dayOfSeason)
-		{
-			if (dayOfSeason !== null && dayOfSeason !== undefined)
-			{
-				weekDays[dayOfSeason % 7];
-			}
-			else
-			{
-				return weekDays[calendarState.dayOfSeason % 7];
-			}
-		}
-		function updateClock()
-		{
-			if (calendarState != null)
-			{
-				var ampm = 'AM';
-				var hours = Math.floor(calendarState.minutes / 60);
-				if (hours > 5 && hours < 18)
-				{
-					g('timeOfDayEmoji').innerHTML = SUN_ICON;
-					g('timeOfDayEmoji').className = 'sunEmoji';
-				}
-				else
-				{
-					g('timeOfDayEmoji').innerHTML = MOON_ICON;
-					g('timeOfDayEmoji').className = 'moonEmoji';
-				}
-				if (hours >= 12)
-				{
-					if (hours > 12)
+					addAlertNarration('Debris cleared.' + ((time > 60) ? ' Whew!' : ''));
+					addStamina(-stamina);
+					deleteFeature(area, feature);
+					if (!areaHasFeatureType(area, 'DEBRIS'))
 					{
-						hours -= 12;
+						addAlertNarration('All debris has been cleared! New features and paths may now be accessible.');
 					}
-					ampm = 'PM';
-				}
-				var minutes = calendarState.minutes % 60;
-				
-				g('timeOfDayHour').innerHTML = hours;
-				var minstr = '00' + minutes.toString();
-				g('timeOfDayMinutes').innerHTML = minstr.substring(minstr.length - 2);
-				g('timeOfDayAmPm').innerHTML = ampm;
-			}
-		}
-		function updateStamina()
-		{
-			g('currentStaminaPercent').innerHTML = Math.round(characterState.stamina / characterState.maxStamina * 100);
-		}
-		function updateMoney()
-		{
-			g('currentMoney').innerHTML = characterState.money.toLocaleString();
-		}
-		function updateNavigationButtons()
-		{
-			var a = getArea(characterState.currentArea);
-			
-			var ntxt = g('northNavButtonText'); ntxt.innerHTML = 'No path';
-			var etxt = g('eastNavButtonText'); etxt.innerHTML = 'No path';
-			var stxt = g('southNavButtonText'); stxt.innerHTML = 'No path';
-			var wtxt = g('westNavButtonText'); wtxt.innerHTML = 'No path';
-			var nbut = g('northNavButton'); nbut.disabled = true;
-			var ebut = g('eastNavButton'); ebut.disabled = true;
-			var sbut = g('southNavButton'); sbut.disabled = true;
-			var wbut = g('westNavButton'); wbut.disabled = true;
-			
-			var txt = null;
-			var but = null;
-			for (var i=0;i<a.exits.length;i++)
-			{
-				var e = a.exits[i];
-				if (e.conditions === null || e.conditions())
-				{
-					txt = g(e.direction.navButtonText);
-					but = g(e.direction.navButton);
-					txt.innerHTML = handleWildcards(e.text);
-					but.disabled = false;
-					but.setAttribute('aria-label', handleWildcards(e.accessibleText));
-					but.setAttribute('data-area', a.id);
-					but.setAttribute('data-exit', i);
 				}
 			}
 		}
-		function populateTabBox()
+	</script>
+	<script> // button handlers
+		function clickClearDebrisButton(button)
 		{
-			switch (selectedTabs.tabBox)
-			{
-				case 'area':
-					populateAreaTab();
-					break;
-				case 'inventory':
-					populateInventoryTab();
-					break;
-				case 'skills':
-					populateSkillsTab();
-					break;
-					break;
-				case 'journal':
-					populateJournalTab();
-					break;
-			}
-		}
-		function populateAreaTab()
-		{
-			var a = getArea(characterState.currentArea);
-			updateAreaTable(a);
-			updateStructuresTable(a);
-			updateFeatureTable(a);
-			updateAreaNpcsTable(a);
-			updateSaleItemsTable(a);
-		}
-		function areaHasSaleItems(a)
-		{
-			for (var i=0;i<a.features.length;i++)
-			{
-				if (a.features[i].type == 'ITEM' && a.features[i].hasOwnProperty('itemStack') && a.features[i].canPurchase)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		function populateInventoryTab()
-		{
-			var hasTools = false;
-			for (var key in characterState.tools)
-			{
-				var tool = characterState.tools[key];
-				if (tool.level > 0)
-				{
-					hasTools = true;
-				}
-			}
-			if (hasTools)
-			{
-				g('toolBox').style.display = 'block';
-				g('noToolBox').style.display = 'none';
-				updateToolsTable();
-			}
-			else
-			{
-				g('toolBox').style.display = 'none';
-				g('noToolBox').style.display = 'block';
-			}
-			var hasInv = false;
-			for (var i=0;i<characterState.inventory.length;i++)
-			{
-				if (characterState.inventory[i].quantity > 0)
-				{
-					hasInv = true;
-					break;
-				}
-			}
-			if (hasInv)
-			{
-				g('inventoryBox').style.display = 'block';
-				g('noInventoryBox').style.display = 'none';
-				updateInventoryTable();
-			}
-			else
-			{
-				g('inventoryBox').style.display = 'none';
-				g('noInventoryBox').style.display = 'block';
-			}
-		}
-		function populateSkillsTab()
-		{
-			var hasSkills = false;
-			for (var key in characterState.skills)
-			{
-				var skills = characterState.skills[key].level;
-				if (skills > 0)
-				{
-					hasSkills = true;
-				}
-			}
-			if (hasSkills)
-			{
-				g('skillBox').style.display = 'block';
-				g('noSkillBox').style.display = 'none';
-			}
-			else
-			{
-				g('skillBox').style.display = 'none';
-				g('noSkillBox').style.display = 'block';
-			}
-			updateSkillsTable();
-		}
-
-		function getPluralizedItemName(item, quantity)
-		{
-			return (quantity > 1 || quantity == 0) ? item.pluralName : item.displayName;
-		}
-		function renderEmoji(emoji, n, label, stacked = false)
-		{
-			var r = ce('span');
-			for (var i=0;i<n;i++)
-			{
-				var s = ce('span');
-				if (stacked)
-				{
-					s.className = 'stackedEmoji';
-				}
-				s.innerHTML = emoji;
-				s.setAttribute('aria-hidden', 'true');
-				r.appendChild(s);
-			}
-			r.setAttribute('aria-role', 'img');
-			r.setAttribute('aria-label', label);
-			r.setAttribute('title', label);
-			r.className = 'emoji';
-			return r;
-		}
-		function renderStars(n, stacked = false)
-		{
-			return renderEmoji(STAR_ICON, n, n + ' star', stacked);
-		}
-		function renderHearts(n, stacked = false)
-		{
-			return renderEmoji(HEART_ICON_RED, n, n + ' heart', stacked);
-		}
-		function renderHourglasses(n, stacked = false)
-		{
-			return renderEmoji(HOURGLASS_ICON, n, n + ' hourglass', stacked);
+			var f = getFeature(button.getAttribute('data-feature'));
+			tryClearDebris(f.level, 30*Math.pow(2, f.level-1), button.getAttribute('data-area'), button.getAttribute('data-feature'));
 		}
 	</script>
 	<script> // skill calc functions
@@ -3607,412 +1336,92 @@
 			return Math.max(0, characterState.skills.cooking.level - level) * 5;
 		}
 	</script>
-	<script> // tool functions
-		function updateToolsTable()
+	<script> // event hook overrides
+		function handleFirstAreaNarration()
 		{
-			var x = g('toolTableBody');
-			x.innerHTML = '';
-			
-			for (var key in characterState.tools)
+			addNarrationMessage('Use the (N:, E:, S:, W:) Navigation buttons to traverse the world\'s different areas.');
+			addNarrationMessage('Some areas have a list of features that you can interact with using the controls below the navigation.');
+			addNarrationMessage('Actions require time and stamina, be wary of the time of day and your stamina.');
+			addNarrationMessage('Make it home by bedtime each night or you wont be well rested for the next day. Run out of stamina and you\'ll be too tired to do any work.');
+		}
+		function handleAreaChange(area, prevArea)
+		{
+			if (areaHasFeatureType(area, 'DEBRIS'))
 			{
-				var tool = characterState.tools[key];
-				
-				if (tool.level > 0)
-				{
-					var row = ce('tr');
-					var nameTd = ce('td');
-					var actionTd = ce('td');
-
-					nameTd.innerHTML = tool.displayName;
-					if (tool.level > 1)
-					{
-						nameTd.appendChild(renderStars(tool.level-1, true));
-					}
-					actionTd.appendChild(makeToolInspectbutton(tool));
-
-					row.appendChild(nameTd);
-					row.appendChild(actionTd);
-					x.appendChild(row);
-				}
+				addNarrationMessage('You\'ll need to clear out this debris before you start working here.');
 			}
 		}
-		function makeToolInspectbutton(tool)
+		function handleFeatureRow(area, feat)
 		{
-			return makeButton('ochreButton', function(){inspectTool(this);}, INSPECT_ICON, 'Inspect ' + tool.displayName, {toolId: tool.id});
-		}
-		function inspectTool(toolButton)
-		{
-			if (characterState.tools.hasOwnProperty(toolButton.getAttribute('data-toolid')))
+			var row = null;
+			if (feat.type == 'STRUCT_EXIT')
 			{
-				var tool = characterState.tools[toolButton.getAttribute('data-toolid')];
-				addAlertNarration(tool.descriptions[Math.min(tool.descriptions.length-1, tool.level)] + ' ' + tool.toolTip);
-			}
+				row = createFeatureRow(feat, { actionFunction: function(){clickActionButton(this, tryLeaveStructure);}, text: 'Exit', accessibleText: 'Exit', attr: { toArea: feat.toArea } });
+			}			
 			else
 			{
-				addAlertNarration('No description available.');
-			}
-		}
-		function upgradeTool(character, id, level)
-		{
-			if (character.tools.hasOwnProperty(id))
-			{
-				character.tools[id].level = (level !== null) ? level : character.tools[id].level + 1;
-				populateInventoryTab();
-			}
-			return getToolLevel(id);
-		}
-		function getToolLevel(id)
-		{
-			if (characterState.tools.hasOwnProperty(id))
-			{
-				return characterState.tools[id].level;
-			}
-			return 0;
-		}
-		function pickupTool(button)
-		{
-			var id = button.getAttribute('data-tool');
-			var level = button.getAttribute('data-level');
-			if (getToolLevel(id) >= level)
-			{
-				addAlertNarration('You don\'t need this tool. You\'ve already got one.');
-			}
-			else
-			{
-				var tool = characterState.tools[id];
-				upgradeTool(characterState, id, level);
-				if (level > 1)
+				if (areaHasFeatureType(area, 'DEBRIS'))
 				{
-					addAlertNarration('You\'ve upgraded your ' + getFuncOrVar(tool.displayName) + '. You don\'t need this old one anymore.');
-				}
-				else
-				{
-					addAlertNarration('You\'ve acquired a ' + getFuncOrVar(tool.displayName) + '.');
-				}
-				deleteFeature(button.getAttribute('data-area'), button.getAttribute('data-feature'));
-			}
-		}
-	</script>
-	<script> // skill functions
-		function updateSkillsTable()
-		{
-			var x = g('skillTableBody');
-			x.innerHTML = '';
-			hideSkillInterfaces();
-			for (var key in characterState.skills)
-			{
-				var skill = characterState.skills[key];
-				
-				if (skill.level > 0)
-				{
-					var row = ce('tr');
-					var nameTd = ce('td');
-					var levelTd = ce('td');
-					var actionTd = ce('td');
-
-					nameTd.innerHTML = skill.displayName;
-					levelTd.innerHTML = skill.level;
-					switch (skill.id)
+					switch (feat.type)
 					{
-						case 'cooking':
-							actionTd.appendChild(makeButton('ochreButton', function(){openSkillInterface('cooking');}, 'Cook', 'Cook'));
+						case 'DEBRIS':
+							row = createFeatureRow(feat, { actionFunction: function(){clickActionButton(this, clickClearDebrisButton);}, text: 'Clear Debris', accessibleText: 'Clear Debris', attr: { area: area.id, feature: feat.id } });
 							break;
 					}
-					actionTd.appendChild(makeSkillInspectbutton(skill));
-
-					row.appendChild(nameTd);
-					row.appendChild(levelTd);
-					row.appendChild(actionTd);
-					x.appendChild(row);
 				}
-			}
-
-			if (characterState.knownRecipes.length > 0)
-			{
-				g('knownRecipesBox').style.display = 'block';
-				g('noRecipesBox').style.display = 'none';
-				g('notNearCookingFeature').style.display = 'none';
-				g('requiredIngredientsBox').style.display = 'none';
-				var sel = g('knownRecipesDropDown');
-				sel.innerHTML = '<option value="" selected>--Select Recipe--</option>';
-				for (var i=0;i<characterState.knownRecipes.length;i++)
+				else
 				{
-					var rec = getRecipe(characterState.knownRecipes[i]);
-					var res = getItem(rec.result.item);
-					var o = ce('option');
-					o.value = rec.id;
-					o.innerHTML = ucaseName(res.displayName + ((rec.result.quantity > 1) ? (' x' + rec.result.quantity) : ''));
-					sel.appendChild(o);
+					var actions = [];
+					switch (feat.type)
+					{
+						case 'FORAGE':
+							// TODO reset foraging every week
+							if (!worldState.foragedThisWeek.includes(feat.id))
+							{
+								actions.push({ actionFunction: function(){clickActionButton(this, clickForageButton);}, text: 'Forage', accessibleText: 'Forage from ' + getFeatureDisplayName(feat), attr: { area: area.id, feature: feat.id} });
+							}
+							break;
+						case 'ITEM':
+							if (feat.hasOwnProperty('actions'))
+							{
+								for (var key in feat.actions)
+								{
+									var act = feat.actions[key];
+									actions.push({ actionFunction: act.actionFunction, text: act.text, accessibleText: act.accessibleText, attr: { area: area.id, feature: feat.id, ...act.attr} });
+								}
+							}
+							if (feat.hasOwnProperty('canPickUp') && feat.canPickUp)
+							{
+								actions.push({ actionFunction: function(){clickActionButton(this, clickTakeItemButton);}, text: 'Take', accessibleText: 'Take ' + getFeatureDisplayName(feat), attr: { area: area.id, feature: feat.id, itemId: feat.itemStack.item, itemLevel: feat.itemStack.level, itemQuantity: feat.itemStack.quantity } });
+							}
+							break;
+						case 'WATER':
+							actions.push({ actionFunction: function(){clickActionButton(this, clickFishButton);}, text: 'Fish', accessibleText: 'Fish in ' + getFeatureDisplayName(feat), attr: { area: area.id, feature: feat.id } });
+							break;
+					}
+					row = createFeatureRow(feat, actions);
 				}
 			}
-			else
-			{
-				g('knownRecipesBox').style.display = 'none';
-				g('noRecipesBox').style.display = 'block';
-			}
+			return row;
 		}
-		function makeSkillInspectbutton(skill)
+		
+		function handleNpcDialog(npc)
 		{
-			return makeButton('ochreButton', function(){inspectSkill(this);}, INSPECT_ICON, 'Inspect ' + skill.displayName, {skillId: skill.id});
-		}
-		function inspectSkill(skillButton)
-		{
-			if (characterState.skills.hasOwnProperty(skillButton.getAttribute('data-skillid')))
+			if (npc.currentActivity == 'SLEEPING')
 			{
-				var skill = characterState.skills[skillButton.getAttribute('data-skillid')];
-				addAlertNarration(skill.description);
+				addTime(1);
+				addNarrationMessage(npc.firstName + ' appears to be asleep.');
+				return true;
 			}
-			else
-			{
-				addAlertNarration('No description available.');
-			}
-		}
-		function upgradeSkill(character, id, level, message)
-		{
-			if (character.skills.hasOwnProperty(id))
-			{
-				var prevLevel = character.skills[id].level;
-				character.skills[id].level = (level !== null) ? level : character.skills[id].level + 1;
-				if (message && character.skills[id].level > prevLevel)
-				{
-					addAlertNarration('Your ' + character.skills[id].displayName + ' skill has increased to ' + character.skills[id].level + '.');
-				}
-				populateSkillsTab();
-			}
-			return getSkillLevel(character, id);
-		}
-		function getSkillLevel(character, id)
-		{
-			if (characterState.skills.hasOwnProperty(id.toLowerCase()))
-			{
-				return characterState.skills[id.toLowerCase()].level;
-			}
-			return 0;
-		}
-		function hideSkillInterfaces()
-		{
-			var interfaces = document.getElementsByClassName('skillInterface');
-			for (var i=0;i<interfaces.length;i++)
-			{
-				interfaces[i].style.display = 'none';
-			}
-		}
-		function openSkillInterface(skillId)
-		{
-			hideSkillInterfaces();
-			var skillInterface = g(skillId + 'Interface');
-			if (skillInterface !== null && skillInterface !== undefined)
-			{
-				skillInterface.style.display = 'block';
-			}
+			return false;
 		}
 	</script>
-	<script> // skill action functions
-		function tryFishingInWater(area, feature)
+	<script> // misc functions
+		function getDebrisDescription(level)
 		{
-			if (characterState.skills.fishing.level < 1)
-			{
-				addAlertNarration('It\'s been a while since you\'ve gone fishing. You\'ll need a rod and some bait, and it wouldn\'t hurt to talk to a local angler for some pointers.');
-			}
-			else
-			{
-				if (characterState.tools.fishingRod.level < 1)
-				{
-					addAlertNarration('You\'ll need to acquire a fishing rod first. Try looking in some of the local shops or talk to some anglers.');
-				}
-				else
-				{
-					var a = getArea(area);
-					var f = getFeature(feature);
-					if (characterState.tools.fishingRod < f.level)
-					{
-						addAlertNarration('You\'ll need to upgrade your fishing rod to fish here.');
-					}
-					else
-					{
-						addNarrationMessage('yerp');
-					}
-				}
-			}
-		}
-		function getRecipe(recipe)
-		{
-			var recId = recipe;
-			if (typeof(recipe) === 'object')
-			{
-				if (recipe.hasOwnProperty('ingredients')) { return recipe; }
-				if ('tagName' in recipe)
-				{
-					recId = item.getAttribute('data-recipeid');
-				}
-			}
-			for (var i=0;i<recipes.length;i++)
-			{
-				if (recipes[i].id == recId) { return recipes[i]; }
-			}
-			return null;
-		}
-		function selectRecipeToCook(recipe)
-		{
-			if (recipe != '' && recipe !== null && recipe !== undefined)
-			{
-				var area = getArea(characterState.currentArea);		
-				var r = getRecipe(recipe);
-				if (canCookRecipeInArea(r, area))
-				{
-					g('requiredIngredientsList').innerHTML = '';
-					g('notNearCookingFeature').style.display = 'none';
-					g('dontHaveIngredientsMessage').style.display = 'none';
-					g('cookButton').style.display = 'none';
-					for (var i=0;i<r.ingredients.length;i++)
-					{
-						var iStack = r.ingredients[i];
-						var n = countInventoryItem(iStack.item, iStack.level);
-						var li = ce('li');
-						if (n > 0)
-						{
-							li.appendChild(makeIngredientSelectBox(iStack));
-						}
-						else
-						{
-							var it = getItem(iStack.item);
-							li.innerHTML = ucaseName(getFuncOrVar(it.displayName));
-							g('dontHaveIngredientsMessage').style.display = 'block';
-						}
-						g('requiredIngredientsList').appendChild(li);
-					}
-					if (g('dontHaveIngredientsMessage').style.display == 'none')
-					{
-						g('cookButton').innerHTML = r.action;
-						g('cookButton').style.display = 'inline';
-					}
-					g('requiredIngredientsBox').style.display = 'block';
-				}
-				else
-				{
-					g('notNearCookingFeature').style.display = 'block';
-					g('requiredIngredientsBox').style.display = 'none';
-				}
-			}
-			else
-			{
-				g('requiredIngredientsBox').style.display = 'none';
-				g('notNearCookingFeature').style.display = 'none';
-				g('noRecipesBox').style.display = 'none';
-			}
-		}
-		function makeIngredientSelectBox(stack)
-		{
-			var sel = ce('select')
-			sel.id = getIngredientSelectId(stack);
-			var stacks = getAllInvetoryItemsAtLevel(stack.item, stack.level);
-			for (var i=0;i<stacks.length;i++)
-			{
-				var o = ce('option');
-				var item = getItem(stacks[i].item);
-				o.value = item.id;
-				o.setAttribute('data-itemLevel', stacks[i].level);
-				o.innerHTML = ucaseName(getFuncOrVar(item.displayName)) + renderStars(stacks[i].level, true).outerHTML;
-				sel.className = 'cookingIngredientSelect';
-				sel.appendChild(o);
-			}
-			return sel;
-		}
-		function getIngredientId(stack)
-		{
-			return stack.item.id + '_' + stack.level + '_' + stack.quantity;
-		}
-		function getIngredientSelectId(stack)
-		{
-			return 'ingredientSelect_' + getIngredientId(stack);
-		}
-		function tryCookRecipe(recipe, selectedIngredients)
-		{
-			var rec = recipe;
-			if (recipe === null || recipe === undefined)
-			{
-				rec = g('knownRecipesDropDown').value;
-			}
-			rec = getRecipe(rec);
-			
-			if (testTime(rec.time, false, false))
-			{
-				if (rec != '' && rec !== null && rec !== undefined)
-				{
-					var usableIngredients = [];
-					for (var i=0;i<rec.ingredients.length;i++)
-					{
-						var ingredientId = getIngredientId(rec.ingredients[i]);
-						var selectedIngredient = null;
-						if (selectedIngredients === null || selectedIngredients === undefined
-							|| !selectedIngredients.hasOwnProperty(ingredientId))
-						{
-							var x = g(getIngredientSelectId(rec.ingredients[i]));
-							if (x !== null && x !== undefined)
-							{
-								selectedIngredient = newItemStack(x.value, 
-									x.options[x.selectedIndex].getAttribute('data-itemLevel'), rec.ingredients[i].quantity);
-							}
-						}
-						else
-						{
-							selectedIngredient = selectedIngredients[ingredientId];
-						}
-						if (selectedIngredient !== null)
-						{
-							usableIngredients.push(getInventoryItem(selectedIngredient.item, selectedIngredient.level));
-						}
-						else
-						{
-							addAlertNarration('There was a problem with one of your ingredients.');
-							return false;
-						}
-					}
-					cookRecipe(rec, usableIngredients);
-				}
-				else
-				{
-					addAlertNarration('Invalid recipe.');
-					return false;
-				}
-			}
-			else
-			{
-				addAlertNarration('You don\'t have time to cook this tonight.');
-			}
-		}
-		function cookRecipe(recipe, inventoryIngredients)
-		{ //TODO fix cooking so that it uses tryAddInventory function before the tryRemoveInventory call
-			var rec = getRecipe(recipe);
-			var totalIngredientLevel = 0;
-			for (var i=0;i<inventoryIngredients.length;i++)
-			{
-				if (!tryRemoveInventory(inventoryIngredients[i].item, inventoryIngredients[i].level, inventoryIngredients[i].quantity, false))
-				{
-					addAlertNarration('There was an issue cooking this item.');
-					return false;
-				}
-				totalIngredientLevel += inventoryIngredients[i].level;
-			}
-			var avgIngLevel = totalIngredientLevel / inventoryIngredients.length;
-			if (roll((avgIngLevel - Math.floor(avgIngLevel)) * 100))
-			{
-				avgIngLevel++;
-			}
-			var res = getItem(rec.result.item);
-			addAlertNarration(ucaseName(getFuncOrVar(res.displayName)) + ((rec.result.quantity > 1) ? ' x' + rec.result.quantity : '') + ' added to your inventory.');
-			addItemToInventory(rec.result.item, getCookedResultLevel(avgIngLevel, rec.result.level), rec.result.quantity);
-			addTime(rec.time);
-			updateDisplay();
-		}
-		function getCookedResultLevel(ingredientLevel, recipelevel)
-		{
-			var level = ingredientLevel + recipelevel;
-			if (roll(getCookingUpgradeChance(level)))
-			{
-				return level + 1;
-			}
-			return level;
+			var adjs = [...sizeLevels];
+			var a = adjs[Math.min(level, adjs.length-1)];
+			return 'A' + n(a) + ' ' + a + ' pile of debris. You\'ll have to clear this out before you can do any work or access any features here.';
 		}
 	</script>
 </head>
@@ -4024,9 +1433,9 @@
 			<div id="controlsBox">
 				<div id="layout-pregame" class="subcontent layout">
 					<button id="continueButton" class="menuButton ochreButton" onclick="continueGame(false);"><span>Continue</span></button><br />
-					<button id="newGameButton" class="menuButton greenButton" onclick="startNewGame(false);"><span>New Game</span></button><br />
+					<button id="newGameButton" class="menuButton greenButton" onclick="createNewCharacter(false);"><span>New Game</span></button><br />
 				</div>
-				<div id="layout-startNewGame" class="subcontent layout">
+				<div id="layout-createNewCharacter" class="subcontent layout">
 					<table style="text-align: left;">
 						<tr><td>Your Name:</td><td><input type="text" id="yourNameInput" value="Bosco" /></td></tr>
 						<tr><td>Property Name:</td><td><input type="text" id="propNameInput" value="Boss Manor" /></td></tr>
@@ -4038,7 +1447,7 @@
 						<tr><td>Eye Color:</td><td><select id="eyeInput"></select></td></tr>
 						<tr><td>Aesthetic:</td><td><select id="aestheticInput"></select></td></tr>
 					</table>
-					<button id="beginButton" class="menuButton greenButton" onclick="loadGame(null);"><span>Begin New Life</span></button><br />
+					<button id="beginButton" class="menuButton greenButton" onclick="loadNewWorld();"><span>Begin New Life</span></button><br />
 				</div>
 				<div id="layout-continueGame" class="subcontent layout">
 					<table>
@@ -4301,59 +1710,59 @@
 			else { g('sexInputFemale').checked = true; }
 			
 			var c = 0;
-			for (var key in heights)
+			for (var key in modData.types.heights)
 			{
 				var o = ce('option');
 				o.value = key;
-				o.innerHTML = heights[key].displayName;
+				o.innerHTML = modData.types.heights[key].displayName;
 				g('heightInput').appendChild(o);
 				c++;
 			}
 			g('heightInput').getElementsByTagName('option')[rint(c)].selected = true;
 			c = 0;
-			for (var key in bodyTypes)
+			for (var key in modData.types.bodies)
 			{
 				var o = ce('option');
 				o.value = key;
-				o.innerHTML = bodyTypes[key].displayName;
+				o.innerHTML = modData.types.bodies[key].displayName;
 				g('bodyTypeInput').appendChild(o);
 				c++;
 			}
 			g('bodyTypeInput').getElementsByTagName('option')[rint(c)].selected = true;
-			for (var i=0;i<naturalHairColors.length;i++)
+			for (var i=0;i<modData.types.hairColorsNatural.length;i++)
 			{
 				var o = ce('option');
-				o.value = naturalHairColors[i];
-				o.innerHTML = hairColors[naturalHairColors[i]].displayName;
+				o.value = modData.types.hairColorsNatural[i];
+				o.innerHTML = modData.types.hairColors[modData.types.hairColorsNatural[i]].displayName;
 				g('hairInput').appendChild(o);
 			}
-			g('hairInput').getElementsByTagName('option')[rint(naturalHairColors.length)].selected = true;
+			g('hairInput').getElementsByTagName('option')[rint(modData.types.hairColorsNatural.length)].selected = true;
 			c = 0;
-			for (var key in hairStyles)
+			for (var key in modData.types.hairStyles)
 			{
 				var o = ce('option');
 				o.value = key;
-				o.innerHTML = hairStyles[key].displayName;
+				o.innerHTML = modData.types.hairStyles[key].displayName;
 				g('hairStyleInput').appendChild(o);
 				c++;
 			}
 			g('hairStyleInput').getElementsByTagName('option')[rint(c)].selected = true;
 			c = 0;
-			for (var key in eyeColors)
+			for (var key in modData.types.eyeColors)
 			{
 				var o = ce('option');
 				o.value = key;
-				o.innerHTML = eyeColors[key].displayName;
+				o.innerHTML = modData.types.eyeColors[key].displayName;
 				g('eyeInput').appendChild(o);
 				c++;
 			}
 			g('eyeInput').getElementsByTagName('option')[rint(c)].selected = true;
 			c = 0;
-			for (var key in aesthetics)
+			for (var key in modData.types.aesthetics)
 			{
 				var o = ce('option');
 				o.value = key;
-				o.innerHTML = aesthetics[key].displayName;
+				o.innerHTML = modData.types.aesthetics[key].displayName;
 				g('aestheticInput').appendChild(o);
 				c++;
 			}
