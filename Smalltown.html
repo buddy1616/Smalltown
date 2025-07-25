@@ -329,6 +329,9 @@
 	<script src="TextCity.js"></script> 
 	<script> // globals
 		worldState.foragedThisWeek = [];
+		modConfig.gamePreferences = {
+			areaTabOnTravel: true
+		};
 	</script>
 	<script> // items
 		modData.items = {
@@ -875,6 +878,10 @@
 		// newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
 		// newNpcSchedule(area, activity, conditions)
 		// weekdays[0] == monday
+		function newNPCWorkSchedule(area)
+		{
+			return newNpcSchedule(area, 'WORKING', [function(){ return isStructureOpen(area);}]);
+		}
 	</script>
 	<script> // NPC: Avery
 		function avery()
@@ -1226,7 +1233,7 @@
 		function createNewCharacter()
 		{
 			setSubcontent('gameBox', 'createNewCharacter');
-			clearNarrationBox();
+			clearNarration();
 			addNarrationMessage('Welcome to Smalltown.');
 			addNarrationMessage('You\'ve inherrited a large property from your recently deceased relative and decided to uproot your whole life to live here.');
 			addNarrationMessage('Tell me a little about yourself:');
@@ -1273,7 +1280,7 @@
 		
 		function tryClearDebris(stamina, time, area, feature)
 		{
-			if (testStamina(stamina, DEFAULT_STAMINA_MESSAGE, false))
+			if (testStamina(stamina, staticMessages.NOT_ENOUGH_STAMINA, false))
 			{
 				if (testTime(time, true, true))
 				{
@@ -1287,12 +1294,24 @@
 				}
 			}
 		}
+		function addBoon()
+		{
+			characterState.boon++;
+		}
 	</script>
 	<script> // button handlers
 		function clickClearDebrisButton(button)
 		{
 			var f = getFeature(button.getAttribute('data-feature'));
 			tryClearDebris(f.level, 30*Math.pow(2, f.level-1), button.getAttribute('data-area'), button.getAttribute('data-feature'));
+		}
+		function clickEnterStructureButton(button)
+		{
+			tryEnterStructure(button.getAttribute('data-structure'));
+		}
+		function clickLeaveStructureButton(button)
+		{
+			tryLeaveStructure(button.getAttribute('data-toarea'));
 		}
 	</script>
 	<script> // skill calc functions
@@ -1336,27 +1355,42 @@
 			return Math.max(0, characterState.skills.cooking.level - level) * 5;
 		}
 	</script>
-	<script> // event hook overrides
-		function handleFirstAreaNarration()
+	<script> // feature display functions
+		function makeButton(className, action, buttonText, accessibleText, attr)
 		{
-			addNarrationMessage('Use the (N:, E:, S:, W:) Navigation buttons to traverse the world\'s different areas.');
-			addNarrationMessage('Some areas have a list of features that you can interact with using the controls below the navigation.');
-			addNarrationMessage('Actions require time and stamina, be wary of the time of day and your stamina.');
-			addNarrationMessage('Make it home by bedtime each night or you wont be well rested for the next day. Run out of stamina and you\'ll be too tired to do any work.');
-		}
-		function handleAreaChange(area, prevArea)
-		{
-			if (areaHasFeatureType(area, 'DEBRIS'))
+			var b = ce('button');
+			b.className = className;
+			b.onclick = action;
+			if (accessibleText !== null)
 			{
-				addNarrationMessage('You\'ll need to clear out this debris before you start working here.');
+				b.setAttribute('aria-label', handleWildcards(accessibleText));
+				b.setAttribute('title', handleWildcards(accessibleText));
 			}
+			b.innerHTML = handleWildcards(buttonText);
+			
+			if (attr != null)
+			{
+				for (var key in attr)
+				{
+					b.setAttribute('data-' + key, attr[key]);
+				}
+			}
+			return b;
+		}
+		function makeItemInspectbutton(item)
+		{
+			return makeButton('ochreButton', function(){inspectItem(this.getAttribute('data-itemid'));}, INSPECT_ICON, 'Inspect ' + item.displayName, {itemid: item.id});
+		}
+		function makeSkillInspectbutton(skill)
+		{
+			return makeButton('ochreButton', function(){inspectSkill(this.getAttribute('data-skillid'));}, INSPECT_ICON, 'Inspect ' + skill.displayName, {skillId: skill.id});
 		}
 		function handleFeatureRow(area, feat)
 		{
 			var row = null;
 			if (feat.type == 'STRUCT_EXIT')
 			{
-				row = createFeatureRow(feat, { actionFunction: function(){clickActionButton(this, tryLeaveStructure);}, text: 'Exit', accessibleText: 'Exit', attr: { toArea: feat.toArea } });
+				row = createFeatureRow(feat, { actionFunction: function(){clickActionButton(this, clickLeaveStructureButton);}, text: 'Exit', accessibleText: 'Exit', attr: { toArea: feat.toArea } });
 			}			
 			else
 			{
@@ -1404,16 +1438,80 @@
 			}
 			return row;
 		}
-		
-		function handleNpcDialog(npc)
+		function createFeatureRow(feat, actions)
 		{
-			if (npc.currentActivity == 'SLEEPING')
+			var row = ce('tr');
+			var nameTd = ce('td');
+			var actionTd = ce('td');
+			nameTd.innerHTML = ucaseName(getFeatureDisplayName(feat));
+			if (feat.type == 'ITEM' && feat.canPurchase && feat.hasOwnProperty('itemStack'))
 			{
-				addTime(1);
-				addNarrationMessage(npc.firstName + ' appears to be asleep.');
-				return true;
+				var price = ce('span');
+				price.innerHTML = ': $' + feat.itemStack.item.value;
+				nameTd.appendChild(price);
 			}
-			return false;
+			if (feat.level > 0)
+			{
+				nameTd.appendChild(renderStars(feat.level, true));
+			}			
+			if (actions !== null && actions !== undefined)
+			{
+				if (Array.isArray(actions))
+				{
+					for (var i=0;i<actions.length;i++)
+					{
+						actionTd.appendChild(makeFeatureActionButton(actions[i].actionFunction, actions[i].text, actions[i].accessibleText, actions[i].attr));
+					}
+				}
+				else
+				{
+					actionTd.appendChild(makeFeatureActionButton(actions.actionFunction, actions.text, actions.accessibleText, actions.attr));
+				}
+			}
+			actionTd.appendChild(makeFeatureInspectbutton(feat));
+			row.appendChild(nameTd);
+			row.appendChild(actionTd);
+			return row;
+		}
+
+		function makeFeatureActionButton(action, buttonText, accessibleText, attr)
+		{
+			return makeButton('ochreButton', action, buttonText, accessibleText, attr);
+		}
+		function makeFeatureInspectbutton(feat)
+		{
+			return makeButton('ochreButton', function(){inspectFeature(this);}, INSPECT_ICON, 'Inspect ' + getFeatureDisplayName(feat), {featureId: feat.id});
+		}
+		function makeStructureInspectbutton(struct)
+		{
+			return makeButton('ochreButton', function(){inspectStructure(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(struct.displayName), {structureId: struct.id});
+		}
+		function makeNpcInspectbutton(n)
+		{
+			return makeButton('ochreButton', function(){inspectNpc(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(n.firstName), {npcId: n.id});
+		}
+		
+		function appendNarrationBox(message, className)
+		{
+			var nar = g('narrationBox');
+			var p = ce('p');
+			if (Array.isArray(message))
+			{
+				var t = [];
+				for (var i=0;i<message.length;i++)
+				{
+					t.push(handleWildcards(message[i]))
+				}
+				p.innerHTML = t.join('<br />');
+			}
+			else { p.innerHTML = handleWildcards(message); }
+			p.className = className;
+			nar.appendChild(p);
+		}
+		function scrollNarrationToBottom()
+		{
+			var nar = g('narrationBox');
+			nar.scrollTop = nar.scrollHeight;
 		}
 	</script>
 	<script> // misc functions
@@ -1423,7 +1521,22 @@
 			var a = adjs[Math.min(level, adjs.length-1)];
 			return 'A' + n(a) + ' ' + a + ' pile of debris. You\'ll have to clear this out before you can do any work or access any features here.';
 		}
+		function getNpcAttraction(npc, app)
+		{
+			var r = 0;
+			var n = modData.npcs[npc];
+			r += (n.personalPreferences.includes(app.bodyType)) ? 1 : 0;
+			r += (n.personalPreferences.includes(app.aesthetic)) ? 1 : 0;
+			r += (n.personalPreferences.includes(app.eyes)) ? 1 : 0;
+			r += (n.personalPreferences.includes(app.currentHairColor)) ? 1 : 0;
+			r += (n.personalPreferences.includes(app.hairStyle)) ? 1 : 0;
+			r += (n.personalPreferences.includes(app.height)) ? 1 : 0;
+			r += (n.personalPreferences.includes(attractors.DYED_HAIR) && app.currentHair != app.naturalHairColor) ? 1 : 0;
+			
+			return r;
+		}
 	</script>
+	<script src="Smalltown_modHooks.js"></script> 
 </head>
 <body>
 	<main role="main">
@@ -1624,8 +1737,8 @@
 											<tr>
 												<td>Area Tab on Travel</td>
 												<td>
-													Yes:<input type="radio" id="pref_areaTabOnTravel_yes" name="areaTabOnTravel" onclick="gamePreferences.areaTabOnTravel = this.checked;" />
-													No: <input type="radio" id="pref_areaTabOnTravel_no" name="areaTabOnTravel" onclick="gamePreferences.areaTabOnTravel = !this.checked;" />
+													Yes:<input type="radio" id="pref_areaTabOnTravel_yes" name="areaTabOnTravel" onclick="modConfig.gamePreferences.areaTabOnTravel = this.checked;" />
+													No: <input type="radio" id="pref_areaTabOnTravel_no" name="areaTabOnTravel" onclick="modConfig.gamePreferences.areaTabOnTravel = !this.checked;" />
 												</td>
 											</tr>
 										</tbody>
@@ -1649,31 +1762,7 @@
 		</div>
 	</main>
 	<script> //initialization
-		document.onkeyup = handleKeyInput;
-
-		function handleKeyInput(e)
-		{
-			if (getSubcontent('gameBox') == 'main')
-			{
-				e = e || window.event;
-				switch (e.keyCode)
-				{
-					case 37: // left
-						g('westNavButton').click();
-						break;
-					case 38: // up
-						g('northNavButton').click();
-						break;
-					case 39: // right
-						g('eastNavButton').click();
-						break;
-					case 40: // down
-						g('southNavButton').click();
-						break;
-				}
-			}
-		}
-		
+	
 		function initialize()
 		{
 			setSubcontent('gameBox', 'pregame');
@@ -1690,7 +1779,7 @@
 				cb.disabled = true;
 				cb.style.display = 'none';
 			}
-			clearNarrationBox();
+			clearNarration();
 			addNarrationMessage('Pre-alpha release. Bugs may be present, please be patient.');
 			addNarrationMessage('Click New Game to start a new game, or Continue if you have a game saved.');
 			backfillPlaceholders();

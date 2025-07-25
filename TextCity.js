@@ -165,7 +165,6 @@ function invDir(dir)
 
 function fixButtonTextWidths(el)
 {
-	//todo nav buttons dont seed to get fixed.
 	var butts = el.getElementsByTagName('button');
 	for (var i=0;i<butts.length;i++)
 	{
@@ -175,12 +174,10 @@ function fixButtonTextWidths(el)
 		{
 			var textw = butt.scrollWidth;
 
-			var scale = butw / textw * .9;
+			var scale = butw / textw * .8;
 			for (var s=0;s<butt.getElementsByTagName('span').length;s++)
 			{
 				var span = butt.getElementsByTagName('span')[s];
-				//span.style.webkitTransform = 'scaleX(' + scale + ')';
-				//span.style.transform = 'scaleX(' + scale + ')';
 				span.style.fontSize = (2.5 * scale) + 'vh';
 			}
 		}
@@ -250,9 +247,9 @@ function getArea(id)
 	}
 	return null;
 }
-function inspectArea(areaButton)
+function inspectArea(areaId)
 {
-	var a = getArea(areaButton.getAttribute('data-areaid'));
+	var a = getArea(areaId);
 	if (a.hasOwnProperty('description'))
 	{
 		addNarrationMessage(handleWildcards(getFuncOrVar(a.description)));
@@ -263,7 +260,7 @@ function inspectArea(areaButton)
 	}
 	else
 	{
-		addNarrationMessage('No description available.');
+		addNarrationMessage(staticMessages.NO_AREA_DESCRIPTION);
 	}
 }
 function setCurrentArea(id, fromExit)
@@ -276,7 +273,7 @@ function setCurrentArea(id, fromExit)
 	}
 	var area = getArea(id);
 	characterState.currentArea = id;
-	clearNarrationBox();
+	clearNarration();
 	if (area.hasOwnProperty('onEnter'))
 	{
 		var enterText = getFuncOrVar(area.onEnter, {fromExit: fromExit});
@@ -286,25 +283,15 @@ function setCurrentArea(id, fromExit)
 
 	if (firstArea)
 	{
-		handleFirstAreaNarration();
+		if (typeof modHooks.enterFirstArea === 'function') { modHooks.enterFirstArea(area); }
 		firstArea = false;
 	}
 	
-	handleAreaChange(area, prevArea);
+	if (typeof modHooks.areaChange === 'function') { modHooks.areaChange(area, prevArea); }
 
-	if (gamePreferences.areaTabOnTravel)
-	{
-		selectTab('tabBox', 'area', 'maintabs', g('mainTab_Area'));
-	}
 	updateDisplay();
 }
-function handleFirstAreaNarration()
-{
-	addNarrationMessage('Use the (N:, E:, S:, W:) Navigation buttons to traverse the world.');
-	addNarrationMessage('Some areas have a list of features that you can interact with using the controls below the navigation.');
-	addNarrationMessage('Actions require time and stamina.');
-}
-function handleAreaChange() { }
+
 function areaHasFeatureType(area, featureType)
 {
 	var a = getArea(area);
@@ -370,7 +357,7 @@ function deleteFeature(area, feature)
 			modData.features.splice(i, 1);
 		}
 	}
-	updateFeatureTable(a);
+	updateDisplay();
 }
 
 function getAreaCookingFeatures(area)
@@ -404,194 +391,23 @@ function canCookRecipeInArea(recipe, area)
 	}
 	return false;
 }
-function updateAreaTable(a)
+function updateArea(area)
 {
-	var x = g('areaTableBody');
-	x.innerHTML = '';
-	var row = ce('tr');
-	var nameTd = ce('td');
-	var actionTd = ce('td');
-	nameTd.innerHTML = handleWildcards(getFuncOrVar(a.name));
-	actionTd.appendChild(makeButton('ochreButton', function(){wait(1);}, '1m', 'Wait 1 minute'));
-	actionTd.appendChild(makeButton('ochreButton', function(){wait(5);}, '5m', 'Wait 5 minutes'));
-	actionTd.appendChild(makeButton('ochreButton', function(){wait(30);}, '30m', 'Wait 30 minutes'));
-	actionTd.appendChild(makeButton('ochreButton', function(){inspectArea(this);}, INSPECT_ICON, 'Inspect ' + handleWildcards(getFuncOrVar(a.name)), {areaId: a.id}));
-	row.appendChild(nameTd);
-	row.appendChild(actionTd);
-	x.appendChild(row);
-}
-function updateStructuresTable(a)
-{
-	var x = g('areaStructuresBody');
-	x.innerHTML = '';
-	g('structuresTable').style.display = 'none';
-	for (var i=0;i<modData.structures.length;i++)
-	{
-		if (modData.structures[i].inArea == a.id)
-		{
-			g('structuresTable').style.display = 'table';
-			var struct = modData.structures[i];
-
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var actionTd = ce('td');
-			var n = getStructureDisplayName(struct);
-			nameTd.innerHTML = n;
-			if (getFuncOrVar(struct.isLocked))
-			{
-				actionTd.appendChild(makeFeatureActionButton(function(){clickActionButton(this, tryEnterStructure);}, LOCK_ICON, n + ' is locked', { area: a.id, structure: struct.id }));
-			}
-			else
-			{
-				actionTd.appendChild(makeFeatureActionButton(function(){clickActionButton(this, tryEnterStructure);}, 'Enter', 'Enter ' + n, { area: a.id, structure: struct.id }));
-			}
-			actionTd.appendChild(makeStructureInspectbutton(struct));
-			row.appendChild(nameTd);
-			row.appendChild(actionTd);
-			x.appendChild(row);
-		}
-	}
-}
-function updateAreaNpcsTable(a)
-{
-	var x = g('areaNpcsBody');
-	x.innerHTML = '';
-	g('areaNpcsTable').style.display = 'none';
-	var ns = getPresentNpcs(a);
-	for (var i=0;i<ns.length;i++)
-	{
-		g('areaNpcsTable').style.display = 'table';
-		var n = ns[i];
-
-		var row = ce('tr');
-		var nameTd = ce('td');
-		var actionTd = ce('td');
-		nameTd.innerHTML = n.firstName + ((n.currentActivity !== null) ? ' (' + ucaseName(modData.types.activities[n.currentActivity].displayName) + ')' : '');
-		actionTd.appendChild(makeButton('ochreButton', function(){talkToNpc(this);}, 'Talk', 'Talk to ' + n.firstName, {npcid: n.id}));
-		actionTd.appendChild(makeNpcInspectbutton(n));
-		row.appendChild(nameTd);
-		row.appendChild(actionTd);
-		x.appendChild(row);
-	}
-}
-function updateFeatureTable(area)
-{
-	var x = g('areaFeaturesBody');
-	x.innerHTML = '';
-	g('featuresTable').style.display = 'none';
-	if (area.hasOwnProperty('features'))
-	{
-		for (var i=0;i<area.features.length;i++)
-		{
-			var feat = area.features[i];
-			var row = null;
-			if (testConditions(characterState, feat.conditions))
-			{
-				g('featuresTable').style.display = 'table';
-				row = handleFeatureRow(area, feat);
-			}
-	
-			if (row != null)
-			{
-				x.appendChild(row);
-			}
-		}
-	}
-	else
-	{
-		g('featuresTable').style.display = 'none';
-	}
-}
-function handleFeatureRow(area, feat) { }
-function createFeatureRow(feat, actions)
-{
-	var row = ce('tr');
-	var nameTd = ce('td');
-	var actionTd = ce('td');
-	nameTd.innerHTML = ucaseName(getFeatureDisplayName(feat));
-	if (feat.type == 'ITEM' && feat.canPurchase && feat.hasOwnProperty('itemStack'))
-	{
-		var price = ce('span');
-		price.innerHTML = ': $' + feat.itemStack.item.value;
-		nameTd.appendChild(price);
-	}
-	if (feat.level > 0)
-	{
-		nameTd.appendChild(renderStars(feat.level, true));
-	}			
-	if (actions !== null && actions !== undefined)
-	{
-		if (Array.isArray(actions))
-		{
-			for (var i=0;i<actions.length;i++)
-			{
-				actionTd.appendChild(makeFeatureActionButton(actions[i].actionFunction, actions[i].text, actions[i].accessibleText, actions[i].attr));
-			}
-		}
-		else
-		{
-			actionTd.appendChild(makeFeatureActionButton(actions.actionFunction, actions.text, actions.accessibleText, actions.attr));
-		}
-	}
-	actionTd.appendChild(makeFeatureInspectbutton(feat));
-	row.appendChild(nameTd);
-	row.appendChild(actionTd);
-	return row;
-}
-function updateSaleItemsTable(area)
-{
-	var x = g('saleItemsBody');
-	x.innerHTML = '';
-	if (areaHasSaleItems(area))
-	{
-		for (var i=0;i<area.features.length;i++)
-		{
-			var row = null;
-			var feat = area.features[i];
-			if (feat.type == 'ITEM' && feat.canPurchase && testConditions(characterState, feat.conditions))
-			{
-				g('saleItemsTable').style.display = 'table';
-				row = createFeatureRow(feat, [
-						{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$', accessibleText: 'Buy 1 for $' + feat.itemStack.item.value, attr: { area: area.id, feature: feat.id, purchaseQuantity: 1 } },
-						{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x5', accessibleText: 'Buy 5 for $' + (feat.itemStack.item.value * 5), attr: { area: area.id, feature: feat.id, purchaseQuantity: 5 } },
-						{ actionFunction: function(){clickActionButton(this, tryPurchaseItem);}, text: '$ x10', accessibleText: 'Buy 10 for $' + (feat.itemStack.item.value * 10), attr: { area: area.id, feature: feat.id, purchaseQuantity: 10 } }
-					]);
-			}
-			if (row != null)
-			{
-				x.appendChild(row);
-			}
-		}
-	}
-	else
-	{
-		g('saleItemsTable').style.display = 'none';
-	}
-}
-function makeFeatureActionButton(action, buttonText, accessibleText, attr)
-{
-	return makeButton('ochreButton', action, buttonText, accessibleText, attr);
-}
-function makeFeatureInspectbutton(feat)
-{
-	return makeButton('ochreButton', function(){inspectFeature(this);}, INSPECT_ICON, 'Inspect ' + getFeatureDisplayName(feat), {featureId: feat.id});
-}
-function makeStructureInspectbutton(struct)
-{
-	return makeButton('ochreButton', function(){inspectStructure(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(struct.displayName), {structureId: struct.id});
-}
-function makeNpcInspectbutton(n)
-{
-	return makeButton('ochreButton', function(){inspectNpc(this);}, INSPECT_ICON, 'Inspect ' + getFuncOrVar(n.firstName), {npcId: n.id});
+	if (typeof modHooks.updateArea_enter === 'function') { modHooks.updateArea_enter(area); }
+	if (typeof modHooks.updateArea_structures === 'function') { modHooks.updateArea_structures(area); }
+	if (typeof modHooks.updateArea_features === 'function') { modHooks.updateArea_features(area); }
+	if (typeof modHooks.updateArea_npcs === 'function') { modHooks.updateArea_npcs(area); }
+	if (typeof modHooks.updateArea_saleItems === 'function') { modHooks.updateArea_saleItems(area); }
+	if (typeof modHooks.updateArea_exit === 'function') { modHooks.updateArea_exit(area); }
 }
 
 function tryTravel(exit)
 {
-	clearNarrationBox();
-	if (testStamina(exit.stamina, 'You don\'t have the stamina for this trip.', false))
+	if (testStamina(exit.stamina, staticMessages.NOT_ENOUGH_STAMINA, false))
 	{
 		if (testTime(exit.time, true, false))
 		{
+			clearNarration();
 			addStamina(-exit.stamina);
 			addTime(exit.time);
 			setCurrentArea(exit.toArea, exit);
@@ -611,27 +427,27 @@ function updatePropertyName(index, prop)
 //*************************| property functions |*************************
 
 //*************************| structure functions |*************************
-function tryEnterStructure(button)
+function tryEnterStructure(structureId)
 {
-	var id = button.getAttribute('data-structure');
-	if (!getFuncOrVar(modData.structures[id].isLocked))
+	if (!getFuncOrVar(modData.structures[structureId].isLocked))
 	{
 		if (testTime(2, true, true))
 		{
-			enterStructure(id);
+			enterStructure(structureId);
 		}
 	}
 	else
 	{
-		addAlertNarration(getStructureDisplayName(id) + ' is locked.');
+		addAlertNarration(getStructureDisplayName(structureId) + ' is locked.');
 	}
 }
-function enterStructure(id)
+function enterStructure(structureId)
 {
-	var struct = modData.structures[id];
+	var struct = modData.structures[structureId];
 	setCurrentArea(struct.areaId, false);
-	clearNarrationBox();
-	addNarrationMessage('You enter ' + getStructureDisplayName(struct) + '.');
+	clearNarration();
+	if (typeof modHooks.narrate_enterStructure === 'function') { modHooks.narrate_enterStructure(struct); }
+	else { addNarrationMessage('You enter ' + getStructureDisplayName(struct) + '.'); }
 	if (struct.hasOwnProperty('firstEnter') && !struct.visited)
 	{
 		addNarrationMessage(handleWildcards(struct.firstEnter));
@@ -642,17 +458,15 @@ function enterStructure(id)
 		inspectStructure(struct);
 	}
 }
-function tryLeaveStructure(button)
+function tryLeaveStructure(toAreaId)
 {
-	var id = button.getAttribute('data-toarea');
 	if (testTime(2, true, true))
 	{
-		leaveStructure(id);
+		leaveStructure(toAreaId);
 	}
 }
 function leaveStructure(id)
 {
-	setSubcontent('viewBox', 'currentArea');
 	setCurrentArea(id, null);
 }
 function getStructureDisplayName(s)
@@ -689,13 +503,20 @@ function isStructureOwnedBy(area, owner)
 //*************************| structure functions |*************************
 
 //*************************| character functions |*************************
+function updateCharacter()
+{
+	if (typeof modHooks.updateCharacter_enter === 'function') { modHooks.updateCharacter_enter(); }
+	if (typeof modHooks.updateCharacter_exit === 'function') { modHooks.updateCharacter_exit(); }
+}
+
 function addStamina(n)
 {
 	characterState.stamina = clamp(characterState.stamina + n, 0, characterState.maxStamina);
 	updateDisplay();
 	if (characterState.stamina == 0)
 	{
-		addNarrationMessage('You are out of stamina, you should head to bed.');
+		if (typeof modHooks.narrate_outOfStamina === 'function') { modHooks.narrate_outOfStamina(); }
+		else { addNarrationMessage(staticMessages.OUT_OF_STAMINA); }
 	}
 }
 function addMoney(n)
@@ -704,14 +525,10 @@ function addMoney(n)
 	updateDisplay();
 	if (characterState.money == 0)
 	{
-		addNarrationMessage('You are out of money.');
+		if (typeof modHooks.narrate_outOfMoney === 'function') { modHooks.narrate_outOfMoney(); }
+		else { addNarrationMessage(staticMessages.OUT_OF_MONEY); }
 	}
 }
-function addBoon()
-{
-	characterState.boon++;
-}
-var DEFAULT_STAMINA_MESSAGE = 'You don\'t have the energy for this.';
 function testStamina(cost, message, update)
 {
 	if (characterState.stamina >= cost)
@@ -738,7 +555,6 @@ function testTime(cost, passout, update)
 	}
 	return false;
 }
-var DEFAULT_MONEY_MESSAGE = 'You don\'t have the money.';
 function testMoney(cost, message, update)
 {
 	if (characterState.money >= cost)
@@ -752,7 +568,6 @@ function testMoney(cost, message, update)
 	}
 	return false;
 }
-var DEFAULT_ADD_INVENTORY_MESSAGE = 'You can\'t hold any more of this item.';
 function tryAddInventory(item, level, quantity, message)
 {
 	var it = item;
@@ -768,7 +583,7 @@ function tryAddInventory(item, level, quantity, message)
 	}
 	if (message)
 	{
-		addAlertNarration(DEFAULT_ADD_INVENTORY_MESSAGE);
+		addAlertNarration(staticMessages.CANT_HOLD_MORE_OF_ITEM);
 	}
 	return false;
 }
@@ -778,7 +593,9 @@ function tryAddItemWithMessage(item, level, quantity)
 	if (success)
 	{
 		var i = modData.items[item];
-		addAlertNarration(ucaseName(getFuncOrVar(i.displayName)) + ' ' + ((quantity > 1) ? 'x' + quantity : '') + 'added to your inventory.');
+		
+		if (typeof modHooks.narrate_addInventoryItem === 'function') { modHooks.narrate_addInventoryItem(item, level, quantity); }
+		else { addAlertNarration(ucaseName(getFuncOrVar(i.displayName)) + ' ' + ((quantity > 1) ? 'x' + quantity : '') + 'added to your inventory.'); }
 		checkQuestTriggers(characterState, questTriggers.GAININVENTORYITEM);
 	}
 	return success;
@@ -789,12 +606,20 @@ function tryRemoveInventory(itemId, level, quantity, message)
 	var name = modData.items[item.item].displayName;
 	if (item.quantity < quantity)
 	{
-		if (message) { addAlertNarration('Tried to remove ' + ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' from your inventory, but couldn\'t.'); }
+		if (message)
+		{
+			if (typeof modHooks.narrate_failRemovingInventoryItem === 'function') { modHooks.narrate_failRemovingInventoryItem(item, level, quantity); }
+			else { addAlertNarration('Tried to remove ' + ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' from your inventory, but couldn\'t.'); }
+		}
 		return false;
 	}
 	else
 	{
-		if (message) { addAlertNarration(ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' removed from your inventory.'); }
+		if (message)
+		{
+			if (typeof modHooks.narrate_removedInventoryItem === 'function') { modHooks.narrate_removedInventoryItem(item, level, quantity); }
+			else { addAlertNarration(ucaseName(name) + ' ' + ((quantity > 1) ? 'x' + quantity + ' ' : '') + ' removed from your inventory.'); }
+		}
 		item.quantity -= quantity;
 	}
 	var i = getInventoryItemIndex(item, level);
@@ -865,51 +690,12 @@ function addItemToInventory(item, level, quantity)
 	
 	return q;
 }
-function updateInventoryTable()
-{
-	var x = g('inventoryTableBody');
-	x.innerHTML = '';
-	
-	for (var i=0;i<characterState.inventory.length;i++)
-	{
-		var stack = characterState.inventory[i];
-		var item = modData.items[stack.item];
-		if (stack.quantity > 0)
-		{
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var actionTd = ce('td');
-			
-			if (stack.quantity > 1)
-			{
-				nameTd.innerHTML = ucaseName(item.pluralName) + ' x' + stack.quantity;
-			}
-			else
-			{
-				nameTd.innerHTML = ucaseName(item.displayName);
-			}
-			if (stack.level > 0)
-			{
-				nameTd.appendChild(renderStars(stack.level, true));
-			}	
 
-			actionTd.appendChild(makeItemInspectbutton(item));
-
-			row.appendChild(nameTd);
-			row.appendChild(actionTd);
-			x.appendChild(row);
-		}
-	}
-}
-function makeItemInspectbutton(item)
+function inspectItem(itemId)
 {
-	return makeButton('ochreButton', function(){inspectItem(this);}, INSPECT_ICON, 'Inspect ' + item.displayName, {itemid: item.id});
-}
-function inspectItem(itemButton)
-{
-	if (modData.items.hasOwnProperty(itemButton.getAttribute('data-itemid')) && modData.items[itemButton.getAttribute('data-itemid')].hasOwnProperty('description'))
+	if (modData.items.hasOwnProperty(itemId) && modData.items[itemId].hasOwnProperty('description'))
 	{
-		var item = modData.items[itemButton.getAttribute('data-itemid')];
+		var item = modData.items[itemId];
 		addAlertNarration(item.description);
 	}
 	else
@@ -1008,62 +794,10 @@ function tryPickupItem(item, level, quantity, areaId, featureId)
 //*************************| character functions |*************************
 
 //*************************| quest functions |*************************
-function populateJournalTab()
+function updateJournal()
 {
-	var xAct = g('activeQuestsTableBody');
-	var xCom = g('completedQuestsTableBody');
-	xAct.innerHTML = '';
-	xCom.innerHTML = '';
-	var hasActive = false;
-	var hasCompleted = false;
-	for (var i=0;i<characterState.quests.length;i++)
-	{
-		if (characterState.quests[i].status != questStatuses.NOTSTARTED)
-		{
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var actionTd = ce('td');
-			nameTd.innerHTML = characterState.quests[i].name;
-			var status = characterState.quests[i].status;
-			if (status == questStatuses.AWARDED)
-			{
-				actionTd.appendChild(makeButton('greenButton', function(){collectQuestRewards(this);}, 'Reward', 'Collect Rewards for ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
-			}
-			actionTd.appendChild(makeButton('ochreButton', function(){inspectQuest(this);}, INSPECT_ICON, 'Inspect ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
-			row.appendChild(nameTd);
-			row.appendChild(actionTd);
-			if (status == questStatuses.ACTIVE || status == questStatuses.AWARDED)
-			{
-				xAct.appendChild(row);
-				hasActive = true;
-			}
-			if (status == questStatuses.COMPLETED)
-			{
-				xCom.appendChild(row);
-				hasCompleted = true;
-			}
-		}
-	}
-	if (hasActive)
-	{
-		g('activeQuestsBox').style.display = 'block';
-		g('noActiveQuestsBox').style.display = 'none';
-	}
-	else
-	{
-		g('activeQuestsBox').style.display = 'none';
-		g('noActiveQuestsBox').style.display = 'block';
-	}
-	if (hasCompleted)
-	{
-		g('completedQuestsBox').style.display = 'block';
-		g('noCompletedQuestsBox').style.display = 'none';
-	}
-	else
-	{
-		g('completedQuestsBox').style.display = 'none';
-		g('noCompletedQuestsBox').style.display = 'block';
-	}
+	if (typeof modHooks.updateJournal_enter === 'function') { modHooks.updateJournal_enter(); }
+	if (typeof modHooks.updateJournal_exit === 'function') { modHooks.updateJournal_exit(); }
 }
 
 function getQuest(quest)
@@ -1098,13 +832,14 @@ function startQuest(questId, message = true)
 			q.status = questStatuses.ACTIVE;
 			if (message)
 			{
-				addAlertNarration('Quest added to your journal: ' + q.name);
+				if (typeof modHooks.narrate_startQuest === 'function') { modHooks.narrate_startQuest(q); }
+				else { addAlertNarration('Quest added to your journal: ' + q.name); }
 			}
 		}
 	}
 	else
 	{
-		if (message) { addAlertNarration('There was a problem starting this quest.'); }
+		if (message) { addAlertNarration(staticMessages.COULD_NOT_START_QUEST); }
 	}
 }
 function getCharacterQuestStatus(quest)
@@ -1143,7 +878,8 @@ function checkQuestTriggers(character, trigger)
 			{
 				if (testConditions(character, q.conditions))
 				{
-					addAlertNarration('You completed the quest: <i>"' + q.name + '"</i>. Check your journal tab to collect rewards.');
+					if (typeof modHooks.narrate_completeQuest === 'function') { modHooks.narrate_completeQuest(q); }
+					else { addAlertNarration('You completed the quest: <i>"' + q.name + '"</i>. Check your journal tab to collect rewards.'); }
 					q.status = questStatuses.AWARDED;
 					updateDisplay();
 				}
@@ -1211,20 +947,6 @@ function getNpcSchedulesForArea(npc, area)
 	}
 	return r;
 }
-function getNpcAttraction(npc, app)
-{
-	var r = 0;
-	var n = modData.npcs[npc];
-	r += (n.personalPreferences.includes(app.bodyType)) ? 1 : 0;
-	r += (n.personalPreferences.includes(app.aesthetic)) ? 1 : 0;
-	r += (n.personalPreferences.includes(app.eyes)) ? 1 : 0;
-	r += (n.personalPreferences.includes(app.currentHairColor)) ? 1 : 0;
-	r += (n.personalPreferences.includes(app.hairStyle)) ? 1 : 0;
-	r += (n.personalPreferences.includes(app.height)) ? 1 : 0;
-	r += (n.personalPreferences.includes(attractors.DYED_HAIR) && app.currentHair != app.naturalHairColor) ? 1 : 0;
-	
-	return r;
-}
 function whereIsNpc(name)
 {
 	var n = getNpcByName(name);
@@ -1240,6 +962,7 @@ function whereIsNpc(name)
 	}
 	return null;
 }
+
 function talkToNpc(npc)
 {
 	var n = npc;
@@ -1250,29 +973,35 @@ function talkToNpc(npc)
 	if (n !== null && n !== undefined)
 	{
 		var npcd = getNpcDialog(n);
-		if (handleNpcDialog(n)) {}
+
+		var customHookResponded = false;
+		if (typeof modHooks.handleNpcDialog === 'function') { customHookResponded = modHooks.handleNpcDialog(n); }
+		if (customHookResponded) {}
 		else if (npcd !== null)
 		{
-			addTime(5);
+			addTime(modConfig.timeCosts.TALK_TO_NPC);
 			addNpcDialogNarration(n, npcd.text);
 			if (npcd.after !== null && npcd.after !== undefined)
 			{
 				npcd.after();
 			}
+			n.conversationsToDate++;
+			n.conversationsToday++;
 		}
 		else
 		{
-			addAlertNarration(n.firstName + ' ' + getRandomArrayValue([
-					'doesn\'t seem to want to talk at the moment.',
-					'doesn\'t have anything to say right now.',
-					'seems to be lost in thought.'
-				]));
+			if (typeof modHooks.narrate_npcNoDialog === 'function') { modHooks.narrate_npcNoDialog(struct); }
+			else {
+					addTime(modConfig.timeCosts.CANT_TALK_TO_NPC);
+					addAlertNarration(n.firstName + ' ' + getRandomArrayValue([
+						'doesn\'t seem to want to talk at the moment.',
+						'doesn\'t have anything to say right now.',
+						'seems to be lost in thought.'
+					])); }
 		}
-		n.conversationsToDate++;
-		n.conversationsToday++;
 	}
 }
-function handleNpcDialog(npc) { return false; }
+
 function getNpcDialog(n)
 {
 	for (var d=0;d<n.dialog.length;d++)
@@ -1292,22 +1021,11 @@ function getNpcDialog(n)
 //*************************| display functions |*************************
 function updateDisplay()
 {
-	updateCalendar();
-	updateStamina();
-	updateMoney();
-	updateNavigationButtons();
-	populateTabBox();
+	if (typeof modHooks.updateDisplay_enter === 'function') { modHooks.updateDisplay_enter(); }
+	updateNavigation();
+	if (typeof modHooks.updateDisplay_exit === 'function') { modHooks.updateDisplay_exit(); }
 }
-function updateCalendar()
-{
-	if (calendarState != null)
-	{
-		g('currentDayOfWeek').innerHTML = getDayOfWeek().displayName;
-		g('currentSeason').innerHTML = calendarState.season.displayName;
-		g('currentSeasonDay').innerHTML = ord(calendarState.dayOfSeason + 1);
-		updateClock();
-	}
-}
+
 function getDayOfWeek(dayOfSeason)
 {
 	if (dayOfSeason !== null && dayOfSeason !== undefined)
@@ -1325,15 +1043,13 @@ function updateClock()
 	{
 		var ampm = 'AM';
 		var hours = Math.floor(calendarState.minutes / 60);
-		if (hours > 5 && hours < 18)
+		if (hours >= modConfig.dayTimeStarts && hours < modConfig.nightTimeStarts)
 		{
-			g('timeOfDayEmoji').innerHTML = SUN_ICON;
-			g('timeOfDayEmoji').className = 'sunEmoji';
+			if (typeof modHooks.updateClock_handleDayTime === 'function') { modHooks.updateClock_handleDayTime(); }
 		}
 		else
 		{
-			g('timeOfDayEmoji').innerHTML = MOON_ICON;
-			g('timeOfDayEmoji').className = 'moonEmoji';
+			if (typeof modHooks.updateClock_handleNightTime === 'function') { modHooks.updateClock_handleNightTime(); }
 		}
 		if (hours >= 12)
 		{
@@ -1351,147 +1067,44 @@ function updateClock()
 		g('timeOfDayAmPm').innerHTML = ampm;
 	}
 }
-function updateStamina()
+
+function updateNavigation()
 {
-	g('currentStaminaPercent').innerHTML = Math.round(characterState.stamina / characterState.maxStamina * 100);
-}
-function updateMoney()
-{
-	g('currentMoney').innerHTML = characterState.money.toLocaleString();
-}
-function updateNavigationButtons()
-{
+	if (typeof modHooks.updateNavigation_enter === 'function') { modHooks.updateNavigation_enter(); }
+
 	var a = getArea(characterState.currentArea);
-	
-	var ntxt = g('northNavButtonText'); ntxt.innerHTML = 'No path';
-	var etxt = g('eastNavButtonText'); etxt.innerHTML = 'No path';
-	var stxt = g('southNavButtonText'); stxt.innerHTML = 'No path';
-	var wtxt = g('westNavButtonText'); wtxt.innerHTML = 'No path';
-	var nbut = g('northNavButton'); nbut.disabled = true;
-	var ebut = g('eastNavButton'); ebut.disabled = true;
-	var sbut = g('southNavButton'); sbut.disabled = true;
-	var wbut = g('westNavButton'); wbut.disabled = true;
-	
-	var txt = null;
-	var but = null;
 	for (var i=0;i<a.exits.length;i++)
 	{
 		var e = a.exits[i];
 		if (e.conditions === null || e.conditions())
 		{
-			txt = g(e.direction.navButtonText);
-			but = g(e.direction.navButton);
-			txt.innerHTML = handleWildcards(e.text);
-			but.disabled = false;
-			but.setAttribute('aria-label', handleWildcards(e.accessibleText));
-			but.setAttribute('data-area', a.id);
-			but.setAttribute('data-exit', i);
+			if (typeof modHooks.updateExitNavigation === 'function') { modHooks.updateExitNavigation(a, e, i); }
 		}
 	}
+	if (typeof modHooks.updateNavigation_exit === 'function') { modHooks.updateNavigation_exit(); }
 }
-function populateTabBox()
-{
-	switch (selectedTabs.tabBox)
-	{
-		case 'area':
-			populateAreaTab();
-			break;
-		case 'inventory':
-			populateInventoryTab();
-			break;
-		case 'skills':
-			populateSkillsTab();
-			break;
-		case 'journal':
-			populateJournalTab();
-			break;
-	}
-}
-function populateAreaTab()
+
+function updateCurrentArea()
 {
 	var a = getArea(characterState.currentArea);
-	updateAreaTable(a);
-	updateStructuresTable(a);
-	updateFeatureTable(a);
-	updateAreaNpcsTable(a);
-	updateSaleItemsTable(a);
+	updateArea(a);
 }
+
 function areaHasSaleItems(a)
 {
 	for (var i=0;i<a.features.length;i++)
 	{
-		if (a.features[i].type == 'ITEM' && a.features[i].hasOwnProperty('itemStack') && a.features[i].canPurchase)
+		if (a.features[i].hasOwnProperty('itemStack') && a.features[i].canPurchase)
 		{
 			return true;
 		}
 	}
 	return false;
 }
-function populateInventoryTab()
+function updateInventory()
 {
-	var hasTools = false;
-	for (var key in characterState.tools)
-	{
-		var tool = characterState.tools[key];
-		if (tool.level > 0)
-		{
-			hasTools = true;
-		}
-	}
-	if (hasTools)
-	{
-		g('toolBox').style.display = 'block';
-		g('noToolBox').style.display = 'none';
-		updateToolsTable();
-	}
-	else
-	{
-		g('toolBox').style.display = 'none';
-		g('noToolBox').style.display = 'block';
-	}
-	var hasInv = false;
-	for (var i=0;i<characterState.inventory.length;i++)
-	{
-		if (characterState.inventory[i].quantity > 0)
-		{
-			hasInv = true;
-			break;
-		}
-	}
-	if (hasInv)
-	{
-		g('inventoryBox').style.display = 'block';
-		g('noInventoryBox').style.display = 'none';
-		updateInventoryTable();
-	}
-	else
-	{
-		g('inventoryBox').style.display = 'none';
-		g('noInventoryBox').style.display = 'block';
-	}
-}
-function populateSkillsTab()
-{
-	var hasSkills = false;
-	for (var key in characterState.skills)
-	{
-		var skills = characterState.skills[key].level;
-		if (skills > 0)
-		{
-			hasSkills = true;
-		}
-	}
-	if (hasSkills)
-	{
-		g('skillBox').style.display = 'block';
-		g('noSkillBox').style.display = 'none';
-	}
-	else
-	{
-		g('skillBox').style.display = 'none';
-		g('noSkillBox').style.display = 'block';
-	}
-	updateSkillsTable();
+	if (typeof modHooks.updateInventory_enter === 'function') { modHooks.updateInventory_enter(); }
+	if (typeof modHooks.updateInventory_exit === 'function') { modHooks.updateInventory_exit(); }
 }
 
 function getPluralizedItemName(item, quantity)
@@ -1541,7 +1154,7 @@ function loadGame(game)
 {
 	if (game === null)
 	{
-		clearNarrationBox();
+		clearNarration();
 		newGame();
 	}
 }
@@ -1549,24 +1162,25 @@ function newGame(name)
 {
 	updateCharacterName(name);
 	characterState = newCharacterState();
-	calendarState = newCalendarState_Standard();
-	setGamePreferences(newGamePreferences_Standard());
+	calendarState = newCalendarState(modConfig.yearStartSeason, modConfig.yearStartDay, modConfig.daysPerYear)
 }
 function startGame()
 {
+	if (typeof modHooks.startGame_enter === 'function') { modHooks.startGame_enter(); }
 	worldState = {};
-	clearNarrationBox();
+	clearNarration();
 	gameHasStarted = true;
+	if (typeof modHooks.startGame_exit === 'function') { modHooks.startGame_exit(); }
 }
 function setGamePreferences(pref)
 {
-	gamePreferences = pref;
-	g('pref_areaTabOnTravel_yes').checked = pref.areaTabOnTravel;
-	g('pref_areaTabOnTravel_no').checked = !pref.areaTabOnTravel;
+	if (typeof modHooks.setGamePreferences_enter === 'function') { modHooks.setGamePreferences_enter(pref); }
+	modConfig.gamePreferences = pref;
+	if (typeof modHooks.setGamePreferences_exit === 'function') { modHooks.setGamePreferences_exit(pref); }
 }
 function passOut()
 {
-	clearNarrationBox();
+	clearNarration();
 	addNarrationMessage('You passed out from exhaustion.');
 	addNarrationMessage('Thankfully a kind citizen found you and took you home.');
 	if (rint(50))
@@ -1627,7 +1241,7 @@ function upgradeTool(character, id, level)
 	if (character.tools.hasOwnProperty(id))
 	{
 		character.tools[id].level = (level !== null) ? level : character.tools[id].level + 1;
-		populateInventoryTab();
+		updateInventory();
 	}
 	return getToolLevel(id);
 }
@@ -1665,72 +1279,11 @@ function pickupTool(button)
 //*************************| tool functions |*************************
 
 //*************************| skill functions |*************************
-function updateSkillsTable()
+function inspectSkill(skillId)
 {
-	var x = g('skillTableBody');
-	x.innerHTML = '';
-	hideSkillInterfaces();
-	for (var key in characterState.skills)
+	if (characterState.skills.hasOwnProperty(skillId))
 	{
-		var skill = characterState.skills[key];
-		
-		if (skill.level > 0)
-		{
-			var row = ce('tr');
-			var nameTd = ce('td');
-			var levelTd = ce('td');
-			var actionTd = ce('td');
-
-			nameTd.innerHTML = skill.displayName;
-			levelTd.innerHTML = skill.level;
-			switch (skill.id)
-			{
-				case 'cooking':
-					actionTd.appendChild(makeButton('ochreButton', function(){openSkillInterface('cooking');}, 'Cook', 'Cook'));
-					break;
-			}
-			actionTd.appendChild(makeSkillInspectbutton(skill));
-
-			row.appendChild(nameTd);
-			row.appendChild(levelTd);
-			row.appendChild(actionTd);
-			x.appendChild(row);
-		}
-	}
-
-	if (characterState.knownRecipes.length > 0)
-	{
-		g('knownRecipesBox').style.display = 'block';
-		g('noRecipesBox').style.display = 'none';
-		g('notNearCookingFeature').style.display = 'none';
-		g('requiredIngredientsBox').style.display = 'none';
-		var sel = g('knownRecipesDropDown');
-		sel.innerHTML = '<option value="" selected>--Select Recipe--</option>';
-		for (var i=0;i<characterState.knownRecipes.length;i++)
-		{
-			var rec = getRecipe(characterState.knownRecipes[i]);
-			var res = getItem(rec.result.item);
-			var o = ce('option');
-			o.value = rec.id;
-			o.innerHTML = ucaseName(res.displayName + ((rec.result.quantity > 1) ? (' x' + rec.result.quantity) : ''));
-			sel.appendChild(o);
-		}
-	}
-	else
-	{
-		g('knownRecipesBox').style.display = 'none';
-		g('noRecipesBox').style.display = 'block';
-	}
-}
-function makeSkillInspectbutton(skill)
-{
-	return makeButton('ochreButton', function(){inspectSkill(this);}, INSPECT_ICON, 'Inspect ' + skill.displayName, {skillId: skill.id});
-}
-function inspectSkill(skillButton)
-{
-	if (characterState.skills.hasOwnProperty(skillButton.getAttribute('data-skillid')))
-	{
-		var skill = characterState.skills[skillButton.getAttribute('data-skillid')];
+		var skill = characterState.skills[skillId];
 		addAlertNarration(skill.description);
 	}
 	else
@@ -1748,7 +1301,7 @@ function upgradeSkill(character, id, level, message)
 		{
 			addAlertNarration('Your ' + character.skills[id].displayName + ' skill has increased to ' + character.skills[id].level + '.');
 		}
-		populateSkillsTab();
+		updateDisplay();
 	}
 	return getSkillLevel(character, id);
 }
@@ -2146,75 +1699,43 @@ function selectTab(container, content, tabClass, selectedTab)
 	updateDisplay();
 }
 
-function clearNarrationBox()
+function clearNarration()
 {
-	var nar = g('narrationBox');
-	nar.innerHTML = '';
-}
-function appendNarrationBox(message, className)
-{
-	var nar = g('narrationBox');
-	var p = ce('p');
-	if (Array.isArray(message))
-	{
-		var t = [];
-		for (var i=0;i<message.length;i++)
-		{
-			t.push(handleWildcards(message[i]))
-		}
-		p.innerHTML = t.join('<br />');
-	}
-	else { p.innerHTML = handleWildcards(message); }
-	p.className = className;
-	nar.appendChild(p);
+	if (typeof modHooks.clearNarration_enter === 'function') { modHooks.clearNarration_enter(); }
+	if (typeof modHooks.clearNarration_exit === 'function') { modHooks.clearNarration_exit(); }
 }
 function addNarrationMessage(message)
 {
-	appendNarrationBox(message, 'narrationMessage');
+	if (typeof modHooks.addNarrationMessage_enter === 'function') { modHooks.addNarrationMessage_enter(message); }
+	if (typeof modHooks.addNarrationMessage_exit === 'function') { modHooks.addNarrationMessage_exit(message); }
 }
-function scrollNarrationToBottom()
-{
-	var nar = g('narrationBox');
-	nar.scrollTop = nar.scrollHeight;
-}
+
 function addAlertNarration(message)
 {
-	addNarrationMessage(message);
-	scrollNarrationToBottom();
+	if (typeof modHooks.addAlertNarration_enter === 'function') { modHooks.addAlertNarration_enter(message); }
+	if (typeof modHooks.addAlertNarration_exit === 'function') { modHooks.addAlertNarration_exit(message); }
 }
 function addSignTextNarration(message)
 {
-	appendNarrationBox(message, 'signTextNarrationMessage');
-	scrollNarrationToBottom();
+	if (typeof modHooks.addSignTextNarration_enter === 'function') { modHooks.addSignTextNarration_enter(message); }
+	if (typeof modHooks.addSignTextNarration_exit === 'function') { modHooks.addSignTextNarration_exit(message); }
 }
 function addNpcDialogNarration(npc, message)
 {
+	if (typeof modHooks.addNpcDialogNarration_enter === 'function') { modHooks.addNpcDialogNarration_enter(npc, message); }
 	var n = npc;
 	if (typeof(n) !== 'object')
 	{
 		n = getNpcByName(npc);
 	}
-	var text = ['<b>' + n.firstName + ' says:</b>'];
-	if (Array.isArray(message))
-	{
-		text.push(...message);
-	}
-	else
-	{
-		text.push(message);
-	}
-	addSignTextNarration(text);
+	if (typeof modHooks.addNpcDialogNarration_exit === 'function') { modHooks.addNpcDialogNarration_exit(n, message); }
 }
 function handleWildcards(text)
 {
 	var r = text;
-	if (gameHasStarted)
-	{
-		r = swapWildCard_Property(getArea(characterState.homeProperty), r, '%HOMEPROPNAME%', getArea(characterState.homeProperty).name);
-		r = swapWildCard_Property(characterState.skills, r, '%EARLYBIRDMIN%', getEarlyBirdMinutes());
-		r = swapWildCard_Property(characterState.skills, r, '%NIGHTOWLMIN%', getNightOwlMinutes());
-	}
+	if (typeof modHooks.handleWildcards_enter === 'function') { r = modHooks.handleWildcards_enter(r); }
 	r = r.replace('%LINE_HOR%', '<hr />');
+	if (typeof modHooks.handleWildcards_exit === 'function') { r = modHooks.handleWildcards_exit(r); }
 	return r;
 }
 function swapWildCard_Property(testProp, text, wildcard, value)
@@ -2226,27 +1747,7 @@ function swapWildCard_Condition(condition, text, wildcard, value)
 	if (condition) { return text.replace(wildcard, value); }
 	return text;
 }
-function makeButton(className, action, buttonText, accessibleText, attr)
-{
-	var b = ce('button');
-	b.className = className;
-	b.onclick = action;
-	if (accessibleText !== null)
-	{
-		b.setAttribute('aria-label', handleWildcards(accessibleText));
-		b.setAttribute('title', handleWildcards(accessibleText));
-	}
-	b.innerHTML = handleWildcards(buttonText);
-	
-	if (attr != null)
-	{
-		for (var key in attr)
-		{
-			b.setAttribute('data-' + key, attr[key]);
-		}
-	}
-	return b;
-}
+
 function testConditions(character, conditions)
 {
 	if (conditions === null || conditions === undefined)
@@ -2272,7 +1773,7 @@ function testConditions(character, conditions)
 function newNpc(firstName, lastName, age, sex, description, appearance, schedule = null, personal = null)
 {
 	var npc = {
-		id: currentNpcId,
+		id: modData.npcs.length,
 		firstName: firstName,
 		lastName: lastName,
 		age: age,
@@ -2287,7 +1788,8 @@ function newNpc(firstName, lastName, age, sex, description, appearance, schedule
 		dialog: [],
 		currentActivity: null
 	};
-	currentNpcId++;
+	
+	if (typeof modHooks.newNpcInjectProperties === 'function') { npc = modHooks.newNpcInjectProperties(npc); }
 	modData.npcs.push(npc);
 	return npc;
 }
@@ -2298,10 +1800,6 @@ function newNpcSchedule(area, activity, conditions)
 		activity: activity,
 		conditions: [...conditions]
 	};
-}
-function newNPCWorkSchedule(area)
-{
-	return newNpcSchedule(area, 'WORKING', [function(){ return isStructureOpen(area);}]);
 }
 function newNpcDialog(text, responses, conditions, after = null)
 {
@@ -2330,10 +1828,6 @@ function newCalendarState(season, day, minutes)
 		minutes: minutes
 	};
 }
-function newCalendarState_Standard()
-{
-	return newCalendarState(seasons.SPRING, 0, 360);
-}
 function newSkill(id, name, desc, level)
 {
 	return {
@@ -2345,84 +1839,67 @@ function newSkill(id, name, desc, level)
 }
 function newSkillSet()
 {
-	return {
-		cooking: newSkill('cooking', 'Cooking', 'Your ability to cook food. The higher level this skill is, the more recipes you know and the better the cooking results will be.', 0),
-		earlyBird: newSkill('earlyBird', 'Early Bird', 'Early birds get the worm. The higher this skill is, the earlier you wake up, and the less sleep you need each night to start with 100% stamina. Currently this skill wakes you up %EARLYBIRDMIN% minute(s) earlier.', 0),
-		fishing: newSkill('fishing', 'Fishing', 'Using a rod, net or traps to pull creatures from the water. Higher skill levels increase the chance to encounter and catch fish that are more difficult to land.', 0),
-		foraging: newSkill('foraging', 'Foraging', 'Harvesting wild plants. Each level increase the yield by approximately 6% and has a 1% chance to grant a bonus yield of higher quality.', 0),
-		nightOwl: newSkill('nightOwl', 'Night Owl', 'This is your ability to stay up late. Each level increases your bedtime. Currently this skill delays your bedtime by %NIGHTOWLMIN% minute(s).', 0)
-	};
+	if (typeof modHooks.newSkillSet === 'function') { return modHooks.newSkillSet(); }
+	return {};
 }
-function newTool(id, name, descs, tip, level)
+function newTool(id, name, descs, tip, level, options)
 {
-	return {
+	var r = {
 		id: id,
 		displayName: name,
 		descriptions: ['', ...descs],
 		toolTip: tip,
 		level: level
 	};
+	if (typeof modHooks.newToolInjectProperties === 'function') { r = modHooks.newToolInjectProperties(r, options); }
+	return r;	
 }
 function newToolSet()
 {
-	return {
-		cookingSet: newTool('cookingSet', 'Cooking Set', ['Just a few old knives and a beat up pot. It\'ll get you started.', 'A few nice utensils, pots and pans.', 'A good set of cooking gear for aspiring chef.', 'A professional cooking set.', 'An exceptional quality cooking set up, for accomplished chefs only.'], 'Useful for preparing and combining cooking ingredients, and cooking recipes.', 0),
-		fishingNet: newTool('fishingNet', 'Fishing Net', ['A rotten, old net with lots of broken string.', 'A decent net for a beginner.', 'A good quality net, it should catch lots of fish.', 'A high quality net, like the professionals use.', 'An exceptional quality net.'], 'Useful for catching lots of small fish in water. Doesn\'t require bait.', 0),
-		fishingRod: newTool('fishingRod', 'Fishing Rod', ['A crumby, old rod.', 'A decent beginning rod.', 'A good hobbist rod.', 'A high quality professional rod.', 'An exceptional quality, high performance fishing rod.'], 'Useful for catching fish in water. Requires bait.', 0),
-		shovel: newTool('shovel', 'Shovel', ['A rusty, chipped, splintery, old, shovel.', 'A decent shovel, nothing special.', 'A good quality, sturdy, shovel.', 'A high quality shovel, should last a long time.', 'An exceptional quality shovel.'], 'Useful for digging in the earth.', 0)
-	};
+	if (typeof modHooks.newToolSet === 'function') { return modHooks.newToolSet(); }
+	return {};
 }
+
 function newCharacterState()
 {
-	return {
+	var r = {
 		name: '',
 		sex: 0,
 		appearance: newCharacterAppearance(),
-		homeProperty: '',
 		health: 0,
 		maxHealth: 0,
 		stamina: 0,
 		maxStamina: 0,
 		money: 0,
-		lastBedtime: 0,
 		currentArea: '',
 		skills: newSkillSet(),
 		tools: newToolSet(),
 		inventory: [],
-		boon: 0,
 		relationships: [],
 		ownedAreas: [],
 		knownRecipes: [],
 		cookedRecipes: {},
 		quests: []
 	};
+	if (typeof modHooks.newCharacterStateInjectProperties === 'function') { r = modHooks.newCharacterStateInjectProperties(r); }
+	return r;
 }
-function newGamePreferences()
+function newArea(id, name, feats, exits, onEnter, options)
 {
-	return {
-		areaTabOnTravel: true
-	};
-}
-function newGamePreferences_Standard()
-{
-	var gp = newGamePreferences();
-	return gp;
-}
-
-function newArea(id, name, feats, exits, onEnter)
-{
-	modData.areas.push({
+	var r = {
 		id: id,
 		name: name,
 		features: [...feats],
 		exits: [...exits],
 		onEnter: onEnter
-	});
+	};
+	if (typeof modHooks.newAreaInjectProperties === 'function') { r = modHooks.newAreaInjectProperties(r, options); }
+	modData.areas.push(r);
 }
 
-function newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
+function newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic, options)
 {
-	return {
+	var r = {
 		height: height,
 		bodyType: bodyType,
 		naturalHairColor: (typeof(natHair) === 'object') ? natHair : modData.types.hairColors[natHair],
@@ -2431,20 +1908,23 @@ function newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, e
 		eyes: (typeof(eyes) === 'object') ? eyes : modData.types.eyeColors[eyes],
 		aesthetic: aesthetic
 	};
+	if (typeof modHooks.newCharacterAppearanceInjectProperties === 'function') { r = modHooks.newCharacterAppearanceInjectProperties(r, options); }
+	return r;
 }
-function newItemStack(item, level, quantity)
+function newItemStack(item, level, quantity, options)
 {
-	return {
+	var r = {
 		item: item,
 		level: level,
 		quantity: quantity
 	};
+	if (typeof modHooks.newItemStackInjectProperties === 'function') { r = modHooks.newItemStackInjectProperties(r, options); }
+	return r;
 }
 
 function newStructure(areaId, type, area, owner, value, locked, amenities, options)
 {
-	var r = { id: currentStructId, type: type, inArea: area, ...modData.types.structures[type], value: value, owner: owner, visited: false };
-	currentStructId++;
+	var r = { id: modData.structures.length, type: type, inArea: area, ...modData.types.structures[type], value: value, owner: owner, visited: false };
 	if (locked !== null) { r.isLocked = locked; }
 	for (var key in options)
 	{
@@ -2473,8 +1953,7 @@ function newStructure(areaId, type, area, owner, value, locked, amenities, optio
 
 function newFeature(type, level, options)
 {
-	var r = { id: currentFeatureId, type: type, ...modData.types.features[type] };
-	currentFeatureId++;
+	var r = { id: modData.features.length, type: type, ...modData.types.features[type] };
 	r.level = (level !== null && level !== undefined) ? level : 0;
 	
 	for (var key in options)
@@ -2584,7 +2063,16 @@ var sexes = ['female', 'male'];
 var sizeLevels = ['tiny', 'small', 'moderate', 'sizable', 'large', 'huge', 'immense'];
 //*************************| type definitions |*************************
 
-
+//*************************| static messages |*************************
+var staticMessages = {
+	CANT_HOLD_MORE_OF_ITEM: 'You can\'t hold any more of this item.',
+	COULD_NOT_START_QUEST: 'There was a problem starting this quest.',
+	NO_AREA_DESCRIPTION: 'No description available.',
+	NOT_ENOUGH_STAMINA: 'You don\'t have the energy for this.',
+	OUT_OF_MONEY: 'You are out of money.',
+	OUT_OF_STAMINA: 'You are out of energy, you should head to bed.'
+};
+//*************************| static messages |*************************
 
 //*************************| global variables |*************************
 var currentSave = {
@@ -2598,7 +2086,6 @@ var currentSave = {
 };
 var characterState = {};
 var worldState = {};
-var gamePreferences = {};
 
 var firstArea = true;
 var calendarState = null;
@@ -2606,9 +2093,20 @@ var calendarState = null;
 var selectedTabs = {};
 var gameHasStarted = false;
 
-var currentNpcId = 0;
-var currentStructId = 0;
-var currentFeatureId = 0;
+var modConfig = {
+	daysPerYear: 360,
+	yearStartDay: 0,
+	yearStartSeason: seasons.SPRING,
+	dayTimeStarts: 6,
+	nightTimeStarts: 18,
+	timeCosts: {
+		CANT_TALK_TO_NPC: 1,
+		TALK_TO_NPC: 5
+	},
+	gamePreferences: {}
+};
+
+var modHooks = {};
 
 var modData = {
 	areas: [],
@@ -2637,3 +2135,12 @@ var modData = {
 	}
 };
 //*************************| global variables |*************************
+
+//*************************| start up |*************************
+window.onload = function(e) {
+	if (typeof modHooks.keyUp === 'function') { document.onkeyup = modHooks.keyUp; }
+	initialize();
+}
+
+function intialize() {}
+//*************************| start up |*************************
