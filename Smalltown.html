@@ -328,150 +328,34 @@
 	</style>
 	<script src="TextCity.js"></script> 
 	<script> // globals
-		worldState.foragedThisWeek = [];
+		currentSave.worldState.foragedThisWeek = [];
 		modConfig.gamePreferences = {
 			areaTabOnTravel: true
 		};
 	</script>
 	<script> // items
-		modData.items = {
-			BEEF: {
-				id: 'BEEF',
-				displayName: 'beef',
-				pluralName: 'beef',
-				description: 'A cut of beef.',
-				value: 5,
-				maxStack: 999
-			},
-			BLACKBERRY: {
-				id: 'BLACKBERRY',
-				displayName: 'blackberry',
-				pluralName: 'blackberries',
-				description: 'A small black, delicious, berry.',
-				value: 1,
-				maxStack: 999
-			},
-			BREAD_CAMPFIRE: {
-				id: 'BREAD_CAMPFIRE',
-				displayName: 'campfire bread',
-				pluralName: 'campfire bread',
-				description: 'A hard, bland bread, cooked in a pot on a campfire.',
-				value: 30,
-				maxStack: 1
-			},
-			BREADKNIFE: {
-				id: 'BREADKNIFE',
-				displayName: 'breadknife',
-				pluralName: 'breadknives',
-				description: 'A very used, old, breadknife.',
-				value: 0,
-				maxStack: 1,
-				questItem: true
-			},
-			BURGER_RUSTIC: {
-				id: 'BURGER_RUSTIC',
-				displayName: 'rustic burger',
-				pluralName: 'rustic burgers',
-				description: 'A very simple, bland burger made over a campfire.',
-				value: 55,
-				maxStack: 1
-			},
-			CHEFSKNIFE: {
-				id: 'CHEFSKNIFE',
-				displayName: 'chef\'s knife',
-				pluralName: 'chef\'s knives',
-				description: 'A once nice knife, it looks like its been thrown around too much.',
-				value: 0,
-				maxStack: 1,
-				questItem: true
-			},
-			CLEAVER: {
-				id: 'CLEAVER',
-				displayName: 'cleaver',
-				pluralName: 'cleavers',
-				description: 'A well-loved, used meat cleaver.',
-				value: 0,
-				maxStack: 1,
-				questItem: true
-			},
-			DOUGH_BASIC: {
-				id: 'DOUGH_BASIC',
-				displayName: 'basic dough',
-				pluralName: 'basic doughs',
-				description: 'An easy, basic, kneaded dough for simple breads.',
-				value: 20,
-				maxStack: 1
-			},
-			FLOUR_WHEAT: {
-				id: 'FLOUR_WHEAT',
-				displayName: 'wheat flour',
-				pluralName: 'wheat flour',
-				description: 'A fine flour made from wheat.',
-				value: 5,
-				maxStack: 999
-			},
-			KABOB_STEAK: {
-				id: 'KABOB_STEAK',
-				displayName: 'steak kabob',
-				pluralName: 'steak kabobs',
-				description: 'Skewered beef roasted over an open flame.',
-				value: 20,
-				maxStack: 999
-			},
-			MARSHMALLOW: {
-				id: 'MARSHMALLOW',
-				displayName: 'marshmallow',
-				pluralName: 'marshmallows',
-				description: 'A squishy white confection. Good for making s\'mores.',
-				value: 1,
-				maxStack: 999
-			},
-			MARSHMALLOW_ROASTED: {
-				id: 'MARSHMALLOW_ROASTED',
-				displayName: 'roasted marshmallow',
-				pluralName: 'roasted marshmallows',
-				description: 'A marshmallow, roasted over an open flame.',
-				value: 2,
-				maxStack: 999
-			},
-			POT_OLD: {
-				id: 'POT_OLD',
-				displayName: 'old pot',
-				pluralName: 'old pots',
-				description: 'A beat up, old, pot.',
-				value: 0,
-				maxStack: 999,
-				questItem: true
-			},
-			SPINACH: {
-				id: 'SPINACH',
-				displayName: 'spinach',
-				pluralName: 'spinach',
-				description: 'A tasty, leafy green, rich in iron.',
-				value: 10,
-				maxStack: 999
-			},
-			SPINACH_SEED: {
-				id: 'SPINACH_SEED',
-				displayName: 'spinach seed',
-				pluralName: 'spinach seeds',
-				description: 'Seeds to grow spinach.',
-				value: 5,
-				maxStack: 999
-			},
-			YEAST: {
-				id: 'YEAST',
-				displayName: 'yeast',
-				pluralName: 'yeast',
-				description: 'A microfungus that is used in breadmaking.',
-				value: 1,
-				maxStack: 999
-			}
-		};
+		// newItem(id, displayName, pluralName, description, value = 0, maxStack = 999, isQuestItem = false)
+		newItem('BEEF', 'beef', 'beef', 'A cut of beef.', 5);
+		newItem('BLACKBERRY', 'blackberry', 'blackberries', 'A small black, delicious, berry.', 1);
+		newItem('BREAD_CAMPFIRE', 'campfire bread', 'campfire bread', 'A hard, bland bread, cooked in a pot on a campfire.', 30, 1);
+		newItem('BREADKNIFE', 'breadknife', 'breadknives', 'A very used, old, breadknife.', 0, 1, true);
+		newItem('BURGER_RUSTIC', 'rustic burger', 'rustic burgers', 'A very simple, bland burger made over a campfire.', 55, 1);
+		newItem('CHEFSKNIFE', 'chef\'s knife', 'chef\'s knives', 'A once nice knife, it looks like its been thrown around too much.', 0, 1, true);
+		newItem('CLEAVER', 'cleaver', 'cleavers', 'A well-loved, used meat cleaver.', 0, 1, true);
+		newItem('DOUGH_BASIC', 'basic dough', 'basic doughs', 'An easy, basic, kneaded dough for simple breads.', 20, 1);
+		newItem('FLOUR_WHEAT', 'wheat flour', 'wheat flour', 'A fine flour made from wheat.', 5);
+		newItem('KABOB_STEAK', 'steak kabob', 'steak kabobs', 'Skewered beef roasted over an open flame.', 20);
+		newItem('MARSHMALLOW', 'marshmallow', 'marshmallows', 'A squishy white confection. Good for making s\'mores.', 1);
+		newItem('MARSHMALLOW_ROASTED', 'roasted marshmallow', 'roasted marshmallows', 'A marshmallow, roasted over an open flame.', 2);
+		newItem('POT_OLD', 'old pot', 'old pots', 'A beat up, old, pot.', 0, 1, true);
+		newItem('SPINACH', 'spinach', 'spinach', 'A tasty, leafy green, rich in iron.', 10);
+		newItem('SPINACH_SEED', 'spinach seed', 'spinach seeds', 'Seeds to grow spinach.', 5);
+		newItem('YEAST', 'yeast', 'yeast', 'A microfungus that is used in breadmaking.', 1);
 	</script>
 	<script> // type definitions
 		modData.types.activities = {
 			CHILLING: {displayName: 'chilling'},
+			HACKY_SACK: {displayName: 'hacky sacking'},
 			EATING: {displayName: 'eating'},
 			GAMING: {displayName: 'gaming'},
 			HOME: {displayName: 'going home'},
@@ -509,18 +393,14 @@
 			HAZEL: {displayName: 'hazel'}
 		};
 		//TODO come up with some way for different cooking features to modify results or limit by recipe
-		modData.types.features = {
-			...modData.types.features,
-			CAMPFIRE: { displayName: 'Camp Fire',
-				description: 'A circle of rocks that you can load wood into and make a fire. Good for roasting marshmallows, and preparing rustic food.',
-				options: { canCook: true }},
-			DEBRIS: { displayName: 'Debris', description: function(f){ return getDebrisDescription(f.level); } },
-			ITEM: { canPickUp: false, canPurchase: false },
-			SIGN: { displayName: 'Sign'},
-			SLEEPINGBAG: { displayName: 'Sleeping Bag',
-				description: 'A basic sleeping system. It works, but you won\'t feel totally refreshed after sleeping here.' },
-			WATER: { displayName: function(f){ return f.waterType.displayName; } }
-		};
+		//newFeatureType(id, displayName, description, options = {})
+		newFeatureType('CAMPFIRE', 'Camp Fire', 'A circle of rocks that you can load wood into and make a fire. Good for roasting marshmallows, and preparing rustic food.', { canCook: true });
+		newFeatureType('DEBRIS', 'Debris', function(f){ return getDebrisDescription(f.level); });
+		newFeatureType('ITEM', 'Item', null, { canPickUp: false, canPurchase: false });
+		newFeatureType('SIGN', 'Sign');
+		newFeatureType('SLEEPINGBAG', 'Sleeping Bag', 'A basic sleeping system. It works, but you won\'t feel totally refreshed after sleeping here.');
+		newFeatureType('WATER', function(f){ return f.waterType.displayName; });
+
 		modData.types.fish = {
 			BLUEGILL: { level: 0, displayName: 'Bluegill', methods: [fishingMethods.ROD], favoriteBaits: [baitTypes.WORM], peakTime: 6, spring: 50, summer: 35, fall: 10, winter: 5 },
 			CATFISH: { level: 0, displayName: 'Catfish', methods: [fishingMethods.ROD], favoriteBaits: [baitTypes.WORM], peakTime: 6, spring: 35, summer: 25, fall: 35, winter: 5 },
@@ -599,593 +479,33 @@
 		newRecipe('MARSHMALLOW_ROASTED', 'roasted marshmallow', 'Roast Marshmallow', [newItemStack('MARSHMALLOW', 0, 1)], newItemStack('MARSHMALLOW_ROASTED', 0, 1), 2);
 		newRecipe('BURGER_RUSTIC', 'rustic burger', 'Assemble Burger', [newItemStack('BREAD_CAMPFIRE', 0, 1), newItemStack('KABOB_STEAK', 0, 1)], newItemStack('BURGER_RUSTIC', 0, 1), 2);
 	</script>
-	<script> // areas
-		// newArea(id, name, feats, exits, onEnter)
-		newArea(
-			'HOMEPROP', 'Home Property',
-			[
-				newFeature('DEBRIS', 1),
-				newFeature('DEBRIS', 2),
-				newFeature('DEBRIS', 3),
-				newFeature('DEBRIS', 4)
-			],
-			[
-				newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDW', 5, 0, null),
-				newExit(directions.SOUTH, '%HOMEPROPNAME% Farm', 'South to %HOMEPROPNAME% Farm', 'HOMEFARM', 5, 0, function() {return !areaHasFeatureType(characterState.currentArea, 'DEBRIS');})
-			],
-			'Welcome Home!'
-		),
-		newArea(
-			'HOMEFARM', '%HOMEPROPNAME% Farm',
-			[
-				newFeature('DEBRIS', 3),
-				newFeature('DEBRIS', 4),
-				newFeature('WATER', 0, {waterType: modData.types.waters.POND, noDelete: true, description: 'A nice-sized pond. You remember swimming here as a child. Maybe there are still fish here.'}),
-				newFeature('ITEM', 0, {displayName: 'Rusty Shovel', description: 'Someone left an old shovel here. It could come in handy.', actions: [ { actionFunction: function(){clickActionButton(this, pickupTool);}, text: 'Take', accessibleText: 'Take Rusty Shovel', attr: {tool: 'shovel', level: 1} }] })
-			],
-			[
-				newExit(directions.NORTH, '%HOMEPROPNAME%', 'North to %HOMEPROPNAME%', 'HOMEPROP', 5, 0, null)
-			],
-			'' 
-		),
-		newArea(
-			'OLDFARMRDW', 'Old Farm Rd West',
-			[
-				newFeature('FORAGE', 0, {...modData.types.forageables.BLACKBERRY})
-			],
-			[
-				newExit(directions.WEST, '%HOMEPROPNAME%', 'West to %HOMEPROPNAME%', 'HOMEPROP', 5, 0, null),
-				newExit(directions.EAST, 'Old Farm rd', 'East on Old Farm road', 'OLDFARMRDE', 20, 0, null)
-			],
-			function(args) {
-				var r = 'West end of Old Farm Road.';
-				if (args !== null && args !== undefined)
-				{
-					switch (invDir(args.fromExit.direction))
-					{
-						case directions.WEST:
-							r += ' Looks like it isn\'t well travelled.';
-							break;
-						case directions.EAST:
-							r += ' You can see your family\'s old property from here.';
-							break;
-					}
-				}
-				return r;
-			}
-		),
-		newArea(
-			'OLDFARMRDE', 'Old Farm Rd East',
-			[],
-			[
-				newExit(directions.WEST, 'Old Farm rd', 'West on Old Farm road', 'OLDFARMRDW', 20, 0, null),
-				newExit(directions.EAST, 'Smalltown', 'East to Smalltown', 'STOWN_W', 5, 0, null),
-				newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Rd', 'RANCHRDN', 20, 0, null)
-			],
-			function(args) {
-				var r = 'East end of Old Farm Road.';
-				if (args !== null && args !== undefined)
-				{
-					switch (invDir(args.fromExit.direction))
-					{
-						case directions.WEST:
-							r += ' You can see Smalltown at the end of the road.';
-							break;
-					}
-				}
-				return r;
-			}
-		),
-		newArea(
-			'RANCHRDN', 'Ranch rd North',
-			[],
-			[
-				newExit(directions.NORTH, 'Old Farm rd', 'North to Old Farm Rd East', 'OLDFARMRDE', 20, 0, null),
-				newExit(directions.SOUTH, 'Ranch Rd', 'South on Ranch Road', 'RANCHRDS', 20, 0, null)
-			],
-			'Ranch Road North'
-		),
-		newArea(
-			'RANCHRDS', 'Ranch rd South',
-			[],
-			[
-				newExit(directions.NORTH, 'Ranch Rd', 'North on Ranch Road', 'RANCHRDN', 20, 0, null),
-				newExit(directions.WEST, 'Emma\'s Ranch', 'West to Emma\'s Ranch', 'EMMARANCH', 10, 0, null)
-			],
-			'Ranch Road South'
-		),
-		newArea(
-			'EMMARANCH', 'Emma\'s Ranch',
-			[],
-			[
-				newExit(directions.EAST, 'Ranch Rd', 'East to Ranch Road', 'RANCHRDS', 10, 0, null)
-			],
-			'Emma\'s Ranch, you can buy live stock and other ranching goods here.'
-		),
-		newArea(
-			'STOWN_PL', 'Smalltown Plaza',
-			[
-				newFeature('SIGN', 0, {displayName: 'Plaza Guide', text: [UP_ARROW + ' North to Smalltown Jr. College', LEFT_ARROW + ' West to Old Farm Road', DOWN_ARROW + ' South to Shell Beach']}),
-				newFeature('ITEM', 0, {displayName: 'Fountain', description: 'A large, marble fountain.',
-					actions: [{ actionFunction: function(){
-													if (testMoney(1, DEFAULT_MONEY_MESSAGE, true))
-													{
-														addAlertNarration('Ploop.');
-														if (characterState.boon < 1) { addBoon(); }
-													}
-												},
-						text: 'Toss a coin', accessibleText: 'Toss a coin into the fountain' }] })
-			],
-			[
-				newExit(directions.NORTH, 'Smalltown North', 'North to Smalltown North', 'STOWN_N', 5, 0, null),
-				newExit(directions.EAST, 'Smalltown East', 'East to Smalltown East', 'STOWN_E', 5, 0, null),
-				newExit(directions.SOUTH, 'Smalltown South', 'South to Smalltown South', 'STOWN_S', 5, 0, null),
-				newExit(directions.WEST, 'Smalltown West', 'West to Smalltown West', 'STOWN_W', 5, 0, null)
-			],
-			'Smalltown Plaza, the town center, where the action is. Check the Plaza Guide for directions.'
-		),
-		newArea(
-			'STOWN_N', 'Smalltown North',
-			[],
-			[
-				newExit(directions.EAST, 'Smalltown JC', 'East to Smalltown junior college', 'STOWN_JC', 5, 0, null),
-				newExit(directions.SOUTH, 'Smalltown Plaza', 'South to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
-				newExit(directions.WEST, 'Cottage Rd', 'West on Cottage Road', 'STOWN_RES1', 5, 0, null)
-			],
-			'The northern edge of Smalltown'
-		),
-		newArea(
-			'STOWN_E', 'Smalltown East',
-			[],
-			[
-				newExit(directions.WEST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
-			],
-			'The eastern edge of Smalltown'
-		),
-		newArea(
-			'STOWN_S', 'Smalltown South',
-			[],
-			[
-				newExit(directions.NORTH, 'Smalltown Plaza', 'North to Smalltown Plaza', 'STOWN_PL', 5, 0, null),
-				newExit(directions.SOUTH, 'Shell Beach', 'South to Shell Beach', 'STOWN_B', 5, 0, null)
-			],
-			function(args) {
-				var r = 'The southern edge of Smalltown.';
-				if (args !== null && args !== undefined)
-				{
-					switch (invDir(args.fromExit.direction))
-					{
-						case directions.NORTH:
-							r += ' Shell Beach is to the south.';
-							break;
-					}
-				}
-				return r;
-			}
-		),
-		newArea(
-			'STOWN_W', 'Smalltown West',
-			[],
-			[
-				newExit(directions.WEST, 'Old Farm rd', 'West to Old Farm road', 'OLDFARMRDE', 5, 0, null),
-				newExit(directions.EAST, 'Smalltown Plaza', 'East to Smalltown Plaza', 'STOWN_PL', 5, 0, null)
-			],
-			'The western edge of Smalltown'
-		),
-		newArea(
-			'STOWN_B', 'Shell Beach',
-			[],
-			[
-				newExit(directions.NORTH, 'Smalltown South', 'North to Smalltown South', 'STOWN_S', 5, 0, null),
-				newExit(directions.SOUTH, 'Pelican Pier', 'South to Pelican Pier', 'STOWN_D', 5, 0, null)
-			],
-			function(args) {
-				var r = 'Shell Beach.';
-				if (args !== null && args !== undefined)
-				{
-					switch (invDir(args.fromExit.direction))
-					{
-						case directions.NORTH:
-							r += ' Lots of sand, waves and pelicans.';
-							break;
-						case directions.SOUTH:
-							r += ' Smalltown South is to the north.';
-							break;
-					}
-				}
-				return r;
-			}
-		),
-		newArea(
-			'STOWN_D', 'Pelican Pier',
-			[],
-			[
-				newExit(directions.NORTH, 'Shell Beach', 'North to Shell Beach', 'STOWN_B', 5, 0, null)
-			],
-			'Pelican Pier, where most of Smalltown\'s fisherman spend their mornings.'
-		),
-		newArea(
-			'STOWN_JC', 'Smalltown Jr. College',
-			[],
-			[
-				newExit(directions.WEST, 'Smalltown North', 'West to Smalltown North', 'STOWN_N', 5, 0, null)
-			],
-			'Smalltown junior college, where Smalltown\'s youth get ready for the working force.'
-		),
-		newArea(
-			'STOWN_RES1', 'Cottage Rd',
-			[],
-			[
-				newExit(directions.EAST, 'Smalltown North', 'East to Smalltown North', 'STOWN_N', 5, 0, null)
-			],
-			'Cottage Road, several Smalltown residents live on this street.'
-		);
-	</script>
-	<script> // structures
-		//"Fanciful Feldecarb Fountain flows full as fluttering fairies frolic fastidiously.  Flick a farthing?" 
-			//function newStructure(areaId, type, area, owner, value, locked, amenities, options)
-		newStructure('HOMESHACK', 'SHACK', 'HOMEPROP', null, 100, false,
-					[
-						newFeature('ITEM', 0, {canPickUp: true, canPurchase: false, itemStack: newItemStack('POT_OLD', 0, 1), onPickup: function(){ startQuest('COOKING_I'); }}),
-						newFeature('CAMPFIRE', 0),
-						newFeature('SLEEPINGBAG', 0)
-					],
-					{ displayName: 'An old dilapidated shack',
-						description: 'It looks like a squatter was living here. They left an old ratty sleeping bag and the remnants of a campfire.' }
-		);
-		newStructure('GARDENSHOP', 'SHOP', 'STOWN_PL', null, 1000000, null,
-					[
-						newFeature('ITEM', 0, {itemStack: newItemStack(modData.items.SPINACH_SEED, 0, 1), canPickUp: false, canPurchase: true, conditions: function() {return (calendarState.season === seasons.SPRING);} })
-					],
-					{ displayName: 'Avery\'s H&G',
-						description: 'Avery\'s Home & Garden stocks seasonal seeds and general garden goods.' }
-		);
-		newStructure('DOMSBAKERY', 'SHOP', 'STOWN_PL', 'dominic', 1000000, null,
-					[],
-					{ displayName: 'BPS Bakery',
-						description: 'The Bread Poet\'s Society, bakery and coffee shop. Open mic on thursday nights.' }
-		);
-		newStructure('CLAYSDELI', 'SHOP', 'STOWN_PL', 'clayton', 1000000, null,
-					[],
-					{ displayName: 'M&G Deli',
-						description: 'Meat and Greet delicatessen. Get your meats and other foods here.' }
-		).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
-		newStructure('GORDOSREST', 'SHOP', 'STOWN_E', 'luigi', 1000000, null,
-					[],
-					{ displayName: 'D\'Graisse\'s',
-						description: 'Smalltowns own fine dining establishment. Very good reviews online.' }
-		);
-		newStructure('EMMASSHOP', 'SHOP', 'EMMARANCH', null, 2000000, null,
-					[],
-					{ displayName: 'Emma\'s Feed',
-						description: 'Emma\'s Feed carries livestock, feed and ranching goods.' }
-		).isLocked = function() { return !between(calendarState.minutes, hm(7, 59), hm(16), false); };
-		newStructure('EMMAS_HOUSE', 'HOUSE', 'EMMARANCH', null, 1000000, true,
-					[],
-					{ noDelete: false, description: 'Emma\'s house.' }
-		);
-		newStructure('EMMARANCH_STAFF', 'BUNG', 'EMMARANCH', null, 10000, true,
-					[],
-					{ noDelete: false, description: 'On-site living for ranch hands.' }
-		);
-		newStructure('MARTIN_HOUSE', 'COTTAGE', 'STOWN_RES1', null, 250000, true,
-					[],
-					{ noDelete: false, description: 'The Martin Residence.' }
-		);
-	</script>
-	<script> // npcs
-		// newNpc(firstName, lastName, age, sex, description, appearance, schedule)
-		// newCharacterAppearance(height, bodyType, natHair, curHair, hairStyle, eyes, aesthetic)
-		// newNpcSchedule(area, activity, conditions)
-		// weekdays[0] == monday
+	<script src="Smalltown_areas.js"></script>
+	<script src="Smalltown_structures.js"></script>
+	
+	<script> // npc functions
 		function newNPCWorkSchedule(area)
 		{
 			return newNpcSchedule(area, 'WORKING', [function(){ return isStructureOpen(area);}]);
 		}
 	</script>
-	<script> // NPC: Avery
-		function avery()
-		{
-			var avery = newNpc('Avery', 'Thompson', 29, 0,
-				'A edgy extrovert that is totes obsessed with plants and crystals.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.BLONDE, modData.types.hairColors.BLUE, modData.types.hairStyles.SPACEBUNS, modData.types.eyeColors.HAZEL, modData.types.aesthetics.ALT),
-				[
-					newNPCWorkSchedule('STOWN_PL_struct_GARDENSHOP')
-				]
-			);
-		}
+	<script src="Smalltown_npc_avery.js"></script>
+	<script src="Smalltown_npc_clayton.js"></script>
+	<script src="Smalltown_npc_dominic.js"></script>
+	<script src="Smalltown_npc_emma.js"></script>
+	<script src="Smalltown_npc_liam.js"></script>
+	<script src="Smalltown_npc_luigi.js"></script>
+	<script src="Smalltown_npc_mateo.js"></script>
+	<script src="Smalltown_npc_olivia.js"></script>
+	<script> // npc initialization
+		initializeNpcs();
 	</script>
-	<script> // NPC: Clayton
-		function clayton()
-		{
-			var clayton = newNpc('Clayton', 'Lespool', 46, 1,
-				'A boisterous, friendly, guy with a salt-and-pepper beard. Likes to joke around and make friends. Loves a good pun.',
-				newCharacterAppearance(modData.types.heights.TALL, modData.types.bodies.FIT, modData.types.hairColors.GREY, modData.types.hairColors.GREY, modData.types.hairStyles.PONYLOW, modData.types.eyeColors.BROWN, modData.types.aesthetics.CASUAL),
-				[
-					newNPCWorkSchedule('STOWN_PL_struct_CLAYSDELI'),
-					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return !isStructureOpen('STOWN_PL_struct_CLAYSDELI'); }])
-				]);
-			clayton.dialog = [
-				newNpcDialog('Hey there I haven\'t seen you around before. I\'m Clay, the butcher. KNIFE to MEAT YOU!! HAHAHA! Get it? KNIFE? MEAT? Because I\'m the butcher! HAHAHA! Anyway, stop on by the deli some time, it\'s in the Smalltown Plaza.', null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_CLAYSDELI', 'clayton')
-									&& !isStructureOpen('STOWN_PL_struct_CLAYSDELI')
-									&& getNpcByName('clayton').conversationsToDate < 1); }]
-				),
-				
-				// quest helpers
-				newNpcDialog(
-						'Hey I like the CUT of your jib, kid. '
-						+ 'I feel like you have the GUTS to be a great butcher. '
-						+ 'I just bought a new cleaver, you can have my old one.'
-					, null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_CLAYSDELI', 'clayton')
-									&& isStructureOpen('STOWN_PL_struct_CLAYSDELI')
-									&& isCharacterOnQuest('COOKING_I')
-									&& getInventoryItem('CLEAVER').quantity < 1
-									&& getNpcByName('clayton').conversationsToDate > 1); }],
-					function() {
-							tryAddItemWithMessage('CLEAVER', 0, 1);
-							addNpcDialogNarration(getNpcByName('clayton'), 'Come back when you have a complete cooking set, and I\'ll show you a few things.');
-						}
-				),
-				newNpcDialog(
-						'So, you\'ve got a set of knives now eh? You\'re a CUT above the rest, HAHAHA! '
-					, null,
-					[function(){ return (isCharacterOnQuest('COOKING_II')
-									&& getNpcByName('clayton').conversationsToday < 1); }],
-					function() {
-							if (testTime(30, false, false))
-							{
-								addNpcDialogNarration(getNpcByName('clayton'), 'I\'ll show you how to make a steak kabob!');
-								learnRecipe(characterState, 'KABOB_STEAK', true);
-								tryAddItemWithMessage('BEEF', 0, 1);
-								addTime(30);
-							}
-							else
-							{
-								addNpcDialogNarration(getNpcByName('clayton'), 'It\'s late, but come back when you have more time. I\'ll show you how to make a basic dough.');
-							}
-						}
-				),
-
-				// work talk
-				newNpcDialog('Welcome to Meat and Greet! You can call me Clay, KNIFE to MEAT YOU! HAHAHA! Get it? KNIFE? MEAT? Because I\'m the butcher! HAHAHA!', null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_CLAYSDELI', 'clayton')
-									&& isStructureOpen('STOWN_PL_struct_CLAYSDELI')
-									&& getNpcByName('clayton').conversationsToDate < 1); }]
-				),
-				newNpcDialog([
-						'Howdy, take a look around, I\'ve got all the choice cuts.',
-						'You need some haggis, or some tripe? I\'ve got it all! HAHAHA!'
-					], null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_DOMSBAKERY', 'dominic')
-									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')); }]
-				)
-			];
-		}
-	</script>
-	<script> // NPC: Dominic
-		function dominic()
-		{
-			var dominic = newNpc('Dominic', 'Smith', 34, 1,
-				'Slender European hipster with a goatee and a love of sourdough bread.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.THIN, modData.types.hairColors.BROWN, modData.types.hairColors.BROWN, modData.types.hairStyles.MANBUN, modData.types.eyeColors.BLUE, modData.types.aesthetics.HIPSTER),
-				[
-					newNPCWorkSchedule('STOWN_PL_struct_DOMSBAKERY'),
-					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return !isStructureOpen('STOWN_PL_struct_DOMSBAKERY'); }])
-				]
-			);
-			dominic.dialog = [
-				newNpcDialog('Hey you\'re new in town, you should come by my bakery sometime. It\'s the Bread Poet\'s Society in the Smalltown Plaza.', null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_DOMSBAKERY', 'dominic')
-									&& !isStructureOpen('STOWN_PL_struct_DOMSBAKERY')
-									&& getNpcByName('dominic').conversationsToDate < 1); }]
-				),
-				
-				// quest helpers
-				newNpcDialog(
-						'You look like you have the spirit of a great baker inside you. '
-						+ 'I smell yeast running through your veins. Here, take this breadknife. '
-						+ 'I was going to throw it out anyway, but it can help you on your way to becoming a great baker.'
-					, null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_DOMSBAKERY', 'dominic')
-									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')
-									&& isCharacterOnQuest('COOKING_I')
-									&& getInventoryItem('BREADKNIFE').quantity < 1
-									&& getNpcByName('dominic').conversationsToDate > 1); }],
-					function() {
-							tryAddItemWithMessage('BREADKNIFE', 0, 1);
-							addNpcDialogNarration(getNpcByName('dominic'), 'Come back once you have a cooking set and I\'ll show you an easy dough recipe.');
-						}
-				),
-				newNpcDialog(
-						'Looks like you\'ve got your cooking set together. Great! '
-					, null,
-					[function(){ return (isCharacterOnQuest('COOKING_II')
-									&& getNpcByName('dominic').conversationsToday < 1); }],
-					function() {
-							if (testTime(30, false, false))
-							{
-								addNpcDialogNarration(getNpcByName('dominic'), 'I\'ll show you how to make a basic dough.');
-								learnRecipe(characterState, 'DOUGH_BASIC', true);
-								tryAddItemWithMessage('YEAST', 0, 1);
-								tryAddItemWithMessage('FLOUR_WHEAT', 0, 1);
-								addTime(30);
-							}
-							else
-							{
-								addNpcDialogNarration(getNpcByName('dominic'), 'It\'s late, but come back when you have more time. I\'ll show you how to make a basic dough.');
-							}
-						}
-				),
-
-				// work talk
-				newNpcDialog('Hey welcome to my bakery. I haven\'t seen you around before.', null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_DOMSBAKERY', 'dominic')
-									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')
-									&& getNpcByName('dominic').conversationsToDate < 1); }]
-				),
-				newNpcDialog([
-						'Hey there, feel free to look around, I\'ve got lots of goodies.',
-						'I specialize in sourdough breads. Why not take a loaf home?'
-					], null,
-					[function(){ return (isStructureOwnedBy('STOWN_PL_struct_DOMSBAKERY', 'dominic')
-									&& isStructureOpen('STOWN_PL_struct_DOMSBAKERY')); }]
-				)
-			];
-		}
-	</script>
-	<script> // NPC: Emma
-		function emma()
-		{
-			var emma = newNpc('Emma', 'Brown', 25, 0,
-				'A bubbly young lass who dresses in rustic western apparel.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.CURVY, modData.types.hairColors.BLONDE, modData.types.hairColors.BLONDE, modData.types.hairStyles.PONYHIGH, modData.types.eyeColors.BLUE, modData.types.aesthetics.RUSTIC),
-				[
-					newNPCWorkSchedule('EMMARANCH_struct_EMMASSHOP'),
-					newNpcSchedule('EMMAS_HOUSE', 'SLEEPING', [function(){ return !isStructureOpen('EMMARANCH_struct_EMMASSHOP'); }])
-				]
-			);
-		}
-	</script>
-	<script> // NPC: Liam
-		function liam()
-		{
-			var liam = newNpc('Liam', 'O\'Doyle', 26, 1,
-				'A fiery ginger who likes to live life on the edge.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.RED, modData.types.hairColors.RED, modData.types.hairStyles.CREW, modData.types.eyeColors.GREEN, modData.types.aesthetics.CASUAL),
-				[
-					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return timeBetween(6*60, 18*60); }])
-				]);
-		}
-	</script>
-	<script> // NPC: Luigi
-		function luigi()
-		{
-			var luigi = newNpc('Luigi', 'D\'Graisse', 30, 1,
-				'A loud, obnoxious, chef with a monstrous ego, but the skills to back it up.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.DADBOD, modData.types.hairColors.BLONDE, modData.types.hairColors.BLONDE, modData.types.hairStyles.CREW, modData.types.eyeColors.BLUE, modData.types.aesthetics.CASUAL),
-				[
-					newNPCWorkSchedule('STOWN_E_struct_GORDOSREST'),
-					newNpcSchedule('STOWN_E', 'CHILLING', [function(){ return !isStructureOpen('STOWN_E_struct_GORDOSREST'); }])
-				]);
-			luigi.dialog = [
-				newNpcDialog('Hey! Who are you? You never heard of Luigi D\'Graisse eh? If you want to taste some real food, come by my restaurant on the east side of town.', null,
-					[function(){ return (isStructureOwnedBy('STOWN_E_struct_GORDOSREST', 'luigi')
-									&& !isStructureOpen('STOWN_E_struct_GORDOSREST')
-									&& getNpcByName('luigi').conversationsToDate < 1); }]
-				),
-				
-				// quest helpers
-				newNpcDialog(
-						'I\'m too busy for you, go away!'
-					, null,
-					[function(){ return (isStructureOwnedBy('STOWN_E_struct_GORDOSREST', 'luigi')
-									&& isStructureOpen('STOWN_E_struct_GORDOSREST')
-									&& isCharacterOnQuest('COOKING_I')
-									&& getInventoryItem('CHEFSKNIFE').quantity < 1
-									&& getNpcByName('luigi').conversationsToDate > 1); }],
-					function() {
-							addAlertNarration('Luigi throws a chef\'s knife at you and it sticks into the wall.');
-							tryAddItemWithMessage('CHEFSKNIFE', 0, 1);
-							addNpcDialogNarration(getNpcByName('luigi'), 'Now scram!');
-						}
-				),
-
-				// work talk
-				newNpcDialog('You decided to experience culinary perfection, I see. Well sit down and order something!', null,
-					[function(){ return (isStructureOwnedBy('STOWN_E_struct_GORDOSREST', 'luigi')
-									&& isStructureOpen('STOWN_E_struct_GORDOSREST')
-									&& getNpcByName('luigi').conversationsToDate < 1); }]
-				)
-			];
-		}
-	</script>
-	<script> // NPC: Mateo
-		function mateo()
-		{
-			var mateo = newNpc('Mateo', 'Gonzalez', 23, 1,
-				'A quiet, hardworking fellow.',
-				newCharacterAppearance(modData.types.heights.AVERAGE, modData.types.bodies.AVERAGE, modData.types.hairColors.BROWN, modData.types.hairColors.BROWN, modData.types.hairStyles.CREW, modData.types.eyeColors.BROWN, modData.types.aesthetics.RUSTIC),
-				[
-					newNpcSchedule('EMMARANCH_STAFF', 'SLEEPING', [function(){ return !timeBetween(5*60, 13*60); }]),
-					newNpcSchedule('EMMARANCH', 'WORKING', [function(){ return !isDayOfWeek(['SA', 'SU']) && timeBetween(5*60, 13*60); }])
-				],
-				[modData.types.bodies.CURVY]);
-		}
-	</script>
-	<script> // NPC: Olivia
-		function olivia()
-		{
-			var olivia = newNpc('Olivia', 'Martin',
-				22, 0, 'A short demure girl, with bangs and glasses. She\'d rather stay at home with her cat than go to parties.',
-				newCharacterAppearance(modData.types.heights.SHORT, modData.types.bodies.THIN, modData.types.hairColors.BLONDE, modData.types.hairColors.BLACK, modData.types.hairStyles.BOB, modData.types.eyeColors.BLUE, modData.types.aesthetics.ALT),
-				[
-					// sleeping
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'SLEEPING', [function(){ return isDayOfWeek(['MO', 'TU', 'WE']) && !timeBetween(hm(7, 30), hm(21, 30)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'SLEEPING', [function(){ return isDayOfWeek(['TH']) && !timeBetween(hm(7, 30), hm(24)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'SLEEPING', [function(){ return isDayOfWeek(['FR', 'SA']) && !timeBetween(hm(9), hm(24)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'SLEEPING', [function(){ return isDayOfWeek(['SU']) && !timeBetween(hm(9), hm(21)); }]),
-					
-					// school days
-					newNpcSchedule('STOWN_RES1', 'WALKING_E', [function(){ return isDayOfWeek(['MO', 'TU', 'WE', 'TH']) && timeBetween(hm(7, 31), hm(7, 40)); }]),
-					newNpcSchedule('STOWN_N', 'WALKING_E', [function(){ return isDayOfWeek(['MO', 'TU', 'WE', 'TH']) && timeBetween(hm(7, 41), hm(7, 50)); }]),
-					newNpcSchedule('STOWN_JC', 'STUDYING', [function(){ return isDayOfWeek(['MO', 'TU', 'WE', 'TH']) && timeBetween(hm(7, 51), hm(12, 0)); }]),
-					newNpcSchedule('STOWN_JC', 'WALKING_W', [function(){ return isDayOfWeek(['MO', 'TU', 'WE', 'TH']) && timeBetween(hm(12, 1), hm(12, 10)); }]),
-					
-					// Monday after school
-					newNpcSchedule('STOWN_N', 'WALKING_W', [function(){ return isDayOfWeek(['MO']) && timeBetween(hm(12, 11), hm(12, 20)); }]),
-					newNpcSchedule('STOWN_RES1', 'HOME', [function(){ return isDayOfWeek(['MO']) && timeBetween(hm(12, 21), hm(12, 30)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'STUDYING', [function(){ return isDayOfWeek(['MO']) && timeBetween(hm(12, 31), hm(17)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['MO']) && timeBetween(hm(17, 1), hm(20)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'CHILLING', [function(){ return isDayOfWeek(['MO']) && timeBetween(hm(20, 1), hm(21, 29)); }]),
-					
-					// work days after school
-					newNpcSchedule('STOWN_N', 'WALKING_S', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(12, 11), hm(12, 20)); }]),
-					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(12, 21), hm(12, 45)); }]),
-					newNpcSchedule('STOWN_PL_struct_DOMSBAKERY', 'CHILLING', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(12, 46), hm(12, 59)); }]),
-					newNpcSchedule('STOWN_PL_struct_DOMSBAKERY', 'WORKING', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(13), hm(17)); }]),
-					newNpcSchedule('STOWN_PL', 'WALKING_N', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(17, 1), hm(17, 10)); }]),
-					newNpcSchedule('STOWN_N', 'WALKING_W', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(17, 11), hm(17, 20)); }]),
-					newNpcSchedule('STOWN_RES1', 'HOME', [function(){ return isDayOfWeek(['TU', 'WE', 'TH']) && timeBetween(hm(17, 21), hm(17, 30)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['TU', 'WE']) && timeBetween(hm(17, 31), hm(18)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'CHILLING', [function(){ return isDayOfWeek(['TU', 'WE']) && timeBetween(hm(18, 31), hm(21, 29)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'GAMING', [function(){ return isDayOfWeek(['TH']) && timeBetween(hm(17, 31), hm(23, 59)); }]),
-
-					// weekends
-					newNpcSchedule('STOWN_RES1', 'WALKING_E', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(9, 1), hm(9, 10)); }]),
-					newNpcSchedule('STOWN_N', 'WALKING_S', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(9, 11), hm(9, 20)); }]),
-					newNpcSchedule('STOWN_PL', 'CHILLING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(9, 21), hm(9, 30)); }]),
-					newNpcSchedule('STOWN_PL_struct_DOMSBAKERY', 'CHILLING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(9, 31), hm(9, 40)); }]),
-					newNpcSchedule('STOWN_PL_struct_DOMSBAKERY', 'READING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(9, 41), hm(12)); }]),
-					newNpcSchedule('STOWN_PL', 'WALKING_N', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(12, 1), hm(12, 10)); }]),
-					newNpcSchedule('STOWN_N', 'WALKING_W', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(12, 11), hm(12, 20)); }]),
-					newNpcSchedule('STOWN_RES1', 'HOME', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(12, 21), hm(12, 30)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'EATING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(12, 31), hm(13)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'CHILLING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(13, 1), hm(14)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'GAMING', [function(){ return isDayOfWeek(['FR', 'SA', 'SU']) && timeBetween(hm(14, 1), hm(17)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['FR', 'SA']) && timeBetween(hm(17, 1), hm(23, 59)); }]),
-					newNpcSchedule('STOWN_RES1_struct_MARTIN_HOUSE', 'READING', [function(){ return isDayOfWeek(['SU']) && timeBetween(hm(17, 1), hm(20, 59)); }]),
-				],
-				[modData.types.aesthetics.ALT, modData.types.bodies.AVERAGE, modData.types.eyeColors.GREEN]);
-		}
-	</script>
-	<script> // npc calls
-		avery();
-		clayton();
-		dominic();
-		emma();
-		liam();
-		luigi();
-		mateo();
-		olivia();
-	</script>
+	
 	<script> // quests
 		// newQuest(id, name, description, rewards, triggers, conditions, onComplete)
 		newQuest('COOKING_I', 'Commence Cooking I',
 				'Collect a breadknife, a cleaver and a chef\'s knife to make a set.',
 				'Beginner Knife Set',
-				[questTriggers.GAININVENTORYITEM],
+				[questTriggers.GAIN_INVENTORY_ITEM],
 				[function(cs) {
 						return (getInventoryItem('BREADKNIFE').quantity > 0
 							&& getInventoryItem('CLEAVER').quantity > 0
@@ -1204,7 +524,7 @@
 		newQuest('COOKING_II', 'Commence Cooking II',
 				'Talk to the local foodies and learn a few techniques.',
 				'Level 1 Cooking Skill',
-				[questTriggers.LEARNRECIPE],
+				[questTriggers.LEARN_RECIPE],
 				[function(cs) {
 						return (characterKnowsRecipe(cs, 'KABOB_STEAK')
 							&& characterKnowsRecipe(cs, 'DOUGH_BASIC'));
@@ -1235,7 +555,7 @@
 			setSubcontent('gameBox', 'createNewCharacter');
 			clearNarration();
 			addNarrationMessage('Welcome to Smalltown.');
-			addNarrationMessage('You\'ve inherrited a large property from your recently deceased relative and decided to uproot your whole life to live here.');
+			addNarrationMessage('You\'ve inherited a large property from your recently deceased relative and decided to uproot your whole life to live here.');
 			addNarrationMessage('Tell me a little about yourself:');
 		}
 		function continueGame()
@@ -1249,7 +569,7 @@
 
 			newGame(name);
 			updatePropertyName('HOMEPROP', prop);
-			characterState.appearance = newCharacterAppearance(
+			currentSave.characterState.appearance = newCharacterAppearance(
 				modData.types.heights[g('heightInput').value],
 				modData.types.bodies[g('bodyTypeInput').value],
 				modData.types.hairColors[g('hairInput').value],
@@ -1259,22 +579,23 @@
 				modData.types.aesthetics[g('aestheticInput').value]
 			);
 			
-			characterState.health = 20;
-			characterState.maxHealth = 20;
-			characterState.stamina = 20;
-			characterState.maxStamina = 20;
-			characterState.money = 0;
-			characterState.lastBedtime = 1440; // midnight
-			characterState.ownedAreas.push('HOMEPROP');
-			characterState.homeProperty = 'HOMEPROP';
+			currentSave.characterState.health = 20;
+			currentSave.characterState.maxHealth = 20;
+			currentSave.characterState.stamina = 20;
+			currentSave.characterState.maxStamina = 20;
+			currentSave.characterState.money = 0;
+			currentSave.characterState.lastBedtime = 1440; // midnight
+			currentSave.characterState.ownedAreas.push('HOMEPROP');
+			currentSave.characterState.homeProperty = 'HOMEPROP';
 			
-			if (g('sexInputMale').checked) { characterState.sex = 1; }
-			else { characterState.sex = 0; }
+			if (g('sexInputMale').checked) { currentSave.characterState.sex = 1; }
+			else if (g('sexInputFemale').checked) { currentSave.characterState.sex = 0; }
+			else { currentSave.characterState.sex = 2; }
 			
 			startGame();
 			setSubcontent('gameBox', 'main');
 			setSubcontent('viewBox', 'currentArea');
-			setCurrentArea(characterState.homeProperty, null);
+			setCurrentArea(currentSave.characterState.homeProperty, null);
 			selectTab('tabBox', 'area', 'maintabs', g('mainTab_Area'));
 		}
 		
@@ -1296,7 +617,7 @@
 		}
 		function addBoon()
 		{
-			characterState.boon++;
+			currentSave.characterState.boon++;
 		}
 	</script>
 	<script> // button handlers
@@ -1317,12 +638,12 @@
 	<script> // skill calc functions
 		function getEarlyBirdMinutes()
 		{
-			var n = characterState.skills.earlyBird.level;
+			var n = currentSave.characterState.skills.earlyBird.level;
 			return Math.max(1, Math.round((Math.pow(n, 2)+(n-1)) / 5 * 2.5));
 		}
 		function getNightOwlMinutes()
 		{
-			var n = characterState.skills.nightOwl.level;
+			var n = currentSave.characterState.skills.nightOwl.level;
 			return Math.max(1, Math.round((Math.pow(n, 2)+(n-1)) / 5) * 5);
 		}
 		function getWakeUpTime()
@@ -1337,22 +658,18 @@
 		}
 		function getForagedBonusChance()
 		{
-			var n = characterState.skills.foraging.level;
+			var n = currentSave.characterState.skills.foraging.level;
 			return n;
 		}
 		function getForagedBonusQuantity()
 		{
-			var n = characterState.skills.foraging.level;
+			var n = currentSave.characterState.skills.foraging.level;
 			return Math.round(n / 2);
 		}
 		function getForagedItemQuantity(quantity)
 		{
-			var n = characterState.skills.foraging.level;
+			var n = currentSave.characterState.skills.foraging.level;
 			return Math.round(quantity * (1 + (n * (100 / 15) / 100)));
-		}
-		function getCookingUpgradeChance(level)
-		{
-			return Math.max(0, characterState.skills.cooking.level - level) * 5;
 		}
 	</script>
 	<script> // feature display functions
@@ -1409,8 +726,8 @@
 					switch (feat.type)
 					{
 						case 'FORAGE':
-							// TODO reset foraging every week
-							if (!worldState.foragedThisWeek.includes(feat.id))
+							// TODO reset foraging every week, need daily time cycle done first
+							if (!currentSave.worldState.foragedThisWeek.includes(feat.id))
 							{
 								actions.push({ actionFunction: function(){clickActionButton(this, clickForageButton);}, text: 'Forage', accessibleText: 'Forage from ' + getFeatureDisplayName(feat), attr: { area: area.id, feature: feat.id} });
 							}
@@ -1424,7 +741,7 @@
 									actions.push({ actionFunction: act.actionFunction, text: act.text, accessibleText: act.accessibleText, attr: { area: area.id, feature: feat.id, ...act.attr} });
 								}
 							}
-							if (feat.hasOwnProperty('canPickUp') && feat.canPickUp)
+							if (feat.options.hasOwnProperty('canPickUp') && feat.options.canPickUp)
 							{
 								actions.push({ actionFunction: function(){clickActionButton(this, clickTakeItemButton);}, text: 'Take', accessibleText: 'Take ' + getFeatureDisplayName(feat), attr: { area: area.id, feature: feat.id, itemId: feat.itemStack.item, itemLevel: feat.itemStack.level, itemQuantity: feat.itemStack.quantity } });
 							}
@@ -1524,7 +841,7 @@
 		function getNpcAttraction(npc, app)
 		{
 			var r = 0;
-			var n = modData.npcs[npc];
+			var n = currentSave.worldState.npcs[npc];
 			r += (n.personalPreferences.includes(app.bodyType)) ? 1 : 0;
 			r += (n.personalPreferences.includes(app.aesthetic)) ? 1 : 0;
 			r += (n.personalPreferences.includes(app.eyes)) ? 1 : 0;
@@ -1762,7 +1079,6 @@
 		</div>
 	</main>
 	<script> //initialization
-	
 		function initialize()
 		{
 			setSubcontent('gameBox', 'pregame');
@@ -1782,21 +1098,22 @@
 			clearNarration();
 			addNarrationMessage('Pre-alpha release. Bugs may be present, please be patient.');
 			addNarrationMessage('Click New Game to start a new game, or Continue if you have a game saved.');
-			backfillPlaceholders();
-			setupCharacterAppearanceOptions();
-		}
-		function backfillPlaceholders()
-		{
+			
+			//backfill placeholders
 			var placeholders = document.getElementsByClassName('placeholder');
 			for (var i=0;i<placeholders.length;i++)
 			{
 				placeholders[i].innerHTML = eval(placeholders[i].getAttribute('data-content'));
 			}
-		}
-		function setupCharacterAppearanceOptions()
-		{
-			if (rint(2) == 0) { g('sexInputMale').checked = true; }
-			else { g('sexInputFemale').checked = true; }
+
+			//set up character options
+			var sex = rint(3);
+			switch (sex)
+			{
+				case 0: g('sexInputMale').checked = true; break;
+				case 1: g('sexInputFemale').checked = true; break;
+				default: g('sexInputOther').checked = true; break;
+			}
 			
 			var c = 0;
 			for (var key in modData.types.heights)
@@ -1855,9 +1172,7 @@
 				g('aestheticInput').appendChild(o);
 				c++;
 			}
-			g('aestheticInput').getElementsByTagName('option')[rint(c)].selected = true;			
+			g('aestheticInput').getElementsByTagName('option')[rint(c)].selected = true;
 		}
-		initialize();
-		
 	</script>
 </body>

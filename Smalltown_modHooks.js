@@ -88,9 +88,9 @@ modHooks.handleWildcards_enter = function(text) {
 	var r = text;
 	if (gameHasStarted)
 	{
-		r = swapWildCard_Property(getArea(characterState.homeProperty), r, '%HOMEPROPNAME%', getArea(characterState.homeProperty).name);
-		r = swapWildCard_Property(characterState.skills, r, '%EARLYBIRDMIN%', getEarlyBirdMinutes());
-		r = swapWildCard_Property(characterState.skills, r, '%NIGHTOWLMIN%', getNightOwlMinutes());
+		r = swapWildCard_Property(getArea(currentSave.characterState.homeProperty), r, '%HOMEPROPNAME%', getArea(currentSave.characterState.homeProperty).name);
+		r = swapWildCard_Property(currentSave.characterState.skills, r, '%EARLYBIRDMIN%', getEarlyBirdMinutes());
+		r = swapWildCard_Property(currentSave.characterState.skills, r, '%NIGHTOWLMIN%', getNightOwlMinutes());
 	}
 	return r;
 }
@@ -106,10 +106,10 @@ modHooks.updateDisplay_enter = function() {
 	}
 
 	//update stamina
-	g('currentStaminaPercent').innerHTML = Math.round(characterState.stamina / characterState.maxStamina * 100);
+	g('currentStaminaPercent').innerHTML = Math.round(currentSave.characterState.stamina / currentSave.characterState.maxStamina * 100);
 
 	//update money
-	g('currentMoney').innerHTML = characterState.money.toLocaleString();
+	g('currentMoney').innerHTML = currentSave.characterState.money.toLocaleString();
 
 	//populate tab box
 	switch (selectedTabs.tabBox)
@@ -121,7 +121,7 @@ modHooks.updateDisplay_enter = function() {
 			updateInventory();
 			break;
 		case 'skills':
-			populateSkillsTab();
+			updateCharacter();
 			break;
 		case 'journal':
 			updateJournal();
@@ -149,12 +149,12 @@ modHooks.updateArea_structures = function(area) {
 	var x = g('areaStructuresBody');
 	x.innerHTML = '';
 	g('structuresTable').style.display = 'none';
-	for (var i=0;i<modData.structures.length;i++)
+	for (var i=0;i<currentSave.worldState.structures.length;i++)
 	{
-		if (modData.structures[i].inArea == area.id)
+		if (currentSave.worldState.structures[i].inArea == area.id)
 		{
 			g('structuresTable').style.display = 'table';
-			var struct = modData.structures[i];
+			var struct = currentSave.worldState.structures[i];
 
 			var row = ce('tr');
 			var nameTd = ce('td');
@@ -187,7 +187,7 @@ modHooks.updateArea_features = function(area) {
 		{
 			var feat = area.features[i];
 			var row = null;
-			if (testConditions(characterState, feat.conditions))
+			if (testConditions(currentSave.characterState, feat.conditions))
 			{
 				g('featuresTable').style.display = 'table';
 				row = handleFeatureRow(area, feat);
@@ -236,7 +236,7 @@ modHooks.updateArea_saleItems = function(area) {
 		{
 			var row = null;
 			var feat = area.features[i];
-			if (feat.type == 'ITEM' && feat.canPurchase && testConditions(characterState, feat.conditions))
+			if (feat.type == 'ITEM' && feat.canPurchase && testConditions(currentSave.characterState, feat.conditions))
 			{
 				g('saleItemsTable').style.display = 'table';
 				row = createFeatureRow(feat, [
@@ -259,9 +259,9 @@ modHooks.updateArea_saleItems = function(area) {
 
 modHooks.updateInventory_enter = function() {
 	var hasTools = false;
-	for (var key in characterState.tools)
+	for (var key in currentSave.characterState.tools)
 	{
-		var tool = characterState.tools[key];
+		var tool = currentSave.characterState.tools[key];
 		if (tool.level > 0)
 		{
 			hasTools = true;
@@ -279,9 +279,9 @@ modHooks.updateInventory_enter = function() {
 		g('noToolBox').style.display = 'block';
 	}
 	var hasInv = false;
-	for (var i=0;i<characterState.inventory.length;i++)
+	for (var i=0;i<currentSave.characterState.inventory.length;i++)
 	{
-		if (characterState.inventory[i].quantity > 0)
+		if (currentSave.characterState.inventory[i].quantity > 0)
 		{
 			hasInv = true;
 			break;
@@ -294,9 +294,9 @@ modHooks.updateInventory_enter = function() {
 		var x = g('inventoryTableBody');
 		x.innerHTML = '';
 		
-		for (var i=0;i<characterState.inventory.length;i++)
+		for (var i=0;i<currentSave.characterState.inventory.length;i++)
 		{
-			var stack = characterState.inventory[i];
+			var stack = currentSave.characterState.inventory[i];
 			var item = modData.items[stack.item];
 			if (stack.quantity > 0)
 			{
@@ -334,9 +334,9 @@ modHooks.updateInventory_enter = function() {
 
 modHooks.updateCharacter_enter = function() {
 	var hasSkills = false;
-	for (var key in characterState.skills)
+	for (var key in currentSave.characterState.skills)
 	{
-		var skills = characterState.skills[key].level;
+		var skills = currentSave.characterState.skills[key].level;
 		if (skills > 0)
 		{
 			hasSkills = true;
@@ -356,9 +356,9 @@ modHooks.updateCharacter_enter = function() {
 	var x = g('skillTableBody');
 	x.innerHTML = '';
 	hideSkillInterfaces();
-	for (var key in characterState.skills)
+	for (var key in currentSave.characterState.skills)
 	{
-		var skill = characterState.skills[key];
+		var skill = currentSave.characterState.skills[key];
 		
 		if (skill.level > 0)
 		{
@@ -384,7 +384,7 @@ modHooks.updateCharacter_enter = function() {
 		}
 	}
 
-	if (characterState.knownRecipes.length > 0)
+	if (currentSave.characterState.knownRecipes.length > 0)
 	{
 		g('knownRecipesBox').style.display = 'block';
 		g('noRecipesBox').style.display = 'none';
@@ -392,9 +392,9 @@ modHooks.updateCharacter_enter = function() {
 		g('requiredIngredientsBox').style.display = 'none';
 		var sel = g('knownRecipesDropDown');
 		sel.innerHTML = '<option value="" selected>--Select Recipe--</option>';
-		for (var i=0;i<characterState.knownRecipes.length;i++)
+		for (var i=0;i<currentSave.characterState.knownRecipes.length;i++)
 		{
-			var rec = getRecipe(characterState.knownRecipes[i]);
+			var rec = getRecipe(currentSave.characterState.knownRecipes[i]);
 			var res = getItem(rec.result.item);
 			var o = ce('option');
 			o.value = rec.id;
@@ -416,20 +416,20 @@ modHooks.updateJournal_enter = function() {
 	xCom.innerHTML = '';
 	var hasActive = false;
 	var hasCompleted = false;
-	for (var i=0;i<characterState.quests.length;i++)
+	for (var i=0;i<currentSave.characterState.quests.length;i++)
 	{
-		if (characterState.quests[i].status != questStatuses.NOTSTARTED)
+		if (currentSave.characterState.quests[i].status != questStatuses.NOTSTARTED)
 		{
 			var row = ce('tr');
 			var nameTd = ce('td');
 			var actionTd = ce('td');
-			nameTd.innerHTML = characterState.quests[i].name;
-			var status = characterState.quests[i].status;
+			nameTd.innerHTML = currentSave.characterState.quests[i].name;
+			var status = currentSave.characterState.quests[i].status;
 			if (status == questStatuses.AWARDED)
 			{
-				actionTd.appendChild(makeButton('greenButton', function(){collectQuestRewards(this);}, 'Reward', 'Collect Rewards for ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
+				actionTd.appendChild(makeButton('greenButton', function(){collectQuestRewards(this);}, 'Reward', 'Collect Rewards for ' + currentSave.characterState.quests[i].name, {questid: currentSave.characterState.quests[i].id}));
 			}
-			actionTd.appendChild(makeButton('ochreButton', function(){inspectQuest(this);}, INSPECT_ICON, 'Inspect ' + characterState.quests[i].name, {questid: characterState.quests[i].id}));
+			actionTd.appendChild(makeButton('ochreButton', function(){inspectQuest(this);}, INSPECT_ICON, 'Inspect ' + currentSave.characterState.quests[i].name, {questid: currentSave.characterState.quests[i].id}));
 			row.appendChild(nameTd);
 			row.appendChild(actionTd);
 			if (status == questStatuses.ACTIVE || status == questStatuses.AWARDED)
@@ -467,16 +467,12 @@ modHooks.updateJournal_enter = function() {
 }
 
 modHooks.updateNavigation_enter = function() {
-	g('northNavButtonText').innerHTML = 'No path';
-	g('eastNavButtonText').innerHTML = 'No path';
-	g('southNavButtonText').innerHTML = 'No path';
-	g('westNavButtonText').innerHTML = 'No path';
-	g('northNavButton').disabled = true;
-	g('eastNavButton').disabled = true;
-	g('southNavButton').disabled = true;
-	g('westNavButton').disabled = true;
+	for (var key in directions)
+	{
+		if (g(directions[key].navButtonText) !== null) { g(directions[key].navButtonText).innerHTML = 'No path'; }
+		if (g(directions[key].navButton) !== null) { g(directions[key].navButton).disabled = true; }
+	}
 }
-
 modHooks.updateExitNavigation = function(area, exit, index) {
 	var txt = g(exit.direction.navButtonText);
 	var but = g(exit.direction.navButton);
@@ -522,4 +518,9 @@ modHooks.handleNpcDialog = function(npc) {
 		return true;
 	}
 	return false;
+}
+
+
+modHooks.getCookedResultLevel_enter = function(ingredientLevel, recipelevel) {
+	return ingredientLevel + recipelevel + currentSave.characterState.skills.cooking.level;
 }
